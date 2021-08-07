@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 function App() {
-  return (
-    <p>test</p>
-  )
+  return <p>test</p>;
 }
 
-export default App
+export default App;

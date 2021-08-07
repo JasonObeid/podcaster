@@ -3,12 +3,15 @@
   "description": "This is a React + vite project.",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://JasonObeid.github.io/podcastClient",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "test": "jest",
-    "lint": "eslint src --max-warnings=0"
+    "lint": "eslint src --max-warnings=0",
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.3",

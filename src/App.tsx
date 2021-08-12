@@ -18,18 +18,18 @@ import Sidebar from "./components/Sidebar";
 import Player from "./components/Player";
 import Feeds from "./components/Feeds";
 import Search from "./components/Search";
-import Subscriptions from "./components/subscriptions";
+import Subscriptions from "./components/Subscriptions";
 import { Box, Theme, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Podcast from "./components/Podcast";
 import catIcon from "./assets/cat.svg";
 import Button from "@material-ui/core/Button";
-
-const drawerWidth = 240;
+import Episode from "./components/Episode";
+import { getImage } from "./utils/utils";
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "grid",
-    gridTemplateColumns: "minmax(216px, 248px) minmax(720px, 1fr)",
+    gridTemplateColumns: "minmax(208px, 256px) minmax(720px, 1fr)",
     gridTemplateRows:
       "minmax(24px, 48px) minmax(600px, 1fr) minmax(88px, 120px)",
     gap: "16px 16px",
@@ -53,7 +53,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: "0px 16px",
   },
   controls: { gridArea: "controls", padding: "0px 16px" },
-  art: { gridArea: "art", paddingLeft: "16px" },
+  art: {
+    gridArea: "art",
+    paddingLeft: "16px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   rounded: {
     borderRadius: "0.7rem",
   },
@@ -66,10 +72,26 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingLeft: "8px",
   },
 }));
+function isHistoryLeaf(history: any) {
+  // if (!history) return false;
 
+  // if (history.length === 1) return true;
+
+  // return history.location.pathname === history.entries[0].pathname;
+  return true;
+}
+function isHistoryRoot(history: any) {
+  // if (!history) return false;
+
+  // if (history.length === 1) return true;
+
+  // return history.location.pathname === history.entries[0].pathname;
+  return true;
+}
 export function App() {
   const classes = useStyles();
   const history = useHistory();
+  console.log(history);
   const { client } = usePodcastIndex();
 
   const [subscriptions, setSubscriptions] = useState<PIApiPodcast[]>([]);
@@ -178,10 +200,16 @@ export function App() {
           </Button>
         </header>
         <header className={classes.header}>
-          <IconButton onClick={() => history.goBack()}>
+          <IconButton
+            onClick={() => history.goBack()}
+            disabled={!isHistoryRoot(history)}
+          >
             <NavigateBeforeIcon />
           </IconButton>
-          <IconButton onClick={() => history.goForward()}>
+          <IconButton
+            onClick={() => history.goForward()}
+            disabled={!isHistoryLeaf(history)}
+          >
             <NavigateNextIcon />
           </IconButton>
         </header>
@@ -216,6 +244,16 @@ export function App() {
                 setIsPlaying={setIsPlaying}
               ></Feeds>
             </Route>
+            <Route exact path="/episode/:episodeId">
+              <Episode
+                playbackStates={playbackStates}
+                episode={undefined}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              ></Episode>
+            </Route>
             <Route exact path="/subscriptions">
               <Subscriptions
                 subscriptions={subscriptions}
@@ -247,19 +285,17 @@ export function App() {
           />
         </footer>
         <footer className={classes.art}>
-          <Box m="auto">
-            {activeEpisode !== undefined ? (
-              <img
-                src={activeEpisode.image}
-                height="56px"
-                width="auto"
-                className={classes.rounded}
-              ></img>
-            ) : (
-              <img height="56px" width="56px" className={classes.rounded}></img>
-            )}
-          </Box>
-          <Box m="auto">
+          {activeEpisode !== undefined ? (
+            <img
+              src={getImage(activeEpisode.image, activeEpisode.feedImage)}
+              height="56px"
+              width="auto"
+              className={classes.rounded}
+            ></img>
+          ) : (
+            <img height="56px" width="56px" className={classes.rounded}></img>
+          )}
+          <Box paddingLeft="16px">
             <Typography gutterBottom variant="subtitle2" component="h6">
               {activeEpisode !== undefined ? activeEpisode.title : ""}
             </Typography>

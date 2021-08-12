@@ -12,12 +12,20 @@ import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
 import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  JSXElementConstructor,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ApiResponse, PIApiEpisodeInfo } from "../podcast-client/types";
 import { makeStyles } from "@material-ui/styles";
 import { Link as MuiLink } from "@material-ui/core";
-import { useHistory, useParams } from "react-router";
+import { useHistory, useLocation, useParams } from "react-router";
 import { Link } from "react-router-dom";
+import { usePodcastIndex } from "../context/PodcastIndexContext";
+import { getImage } from "../utils/utils";
 const useStyles = makeStyles({
   endItems: {
     display: "flex",
@@ -32,6 +40,12 @@ const useStyles = makeStyles({
     flexDirection: "column",
     rowGap: "8px",
     alignItems: "center",
+  },
+  text: {
+    display: "-webkit-box",
+    "-webkit-line-clamp": "4",
+    "-webkit-box-orient": "vertical",
+    overflow: "hidden",
   },
 });
 
@@ -48,7 +62,7 @@ type FeedProps = {
   >;
   isPlaying: boolean;
   setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  episode: PIApiEpisodeInfo;
+  episode: PIApiEpisodeInfo | undefined;
   playbackStates: Map<number, number>;
 };
 
@@ -78,23 +92,27 @@ const ContextualComponent = ({ html }) => {
       .createRange()
       .createContextualFragment(html);
 
-    if (current !== null) {
-      current.appendChild(documentFragment);
-    }
+    current.appendChild(documentFragment);
 
     return () => {
       current.textContent = "";
     };
   }, [html]);
 
-  return <Fragment ref={ref} />;
+  return <div ref={ref} />;
 };
 
-function getDescriptionText(html): string {
-  return document.createRange().createContextualFragment(html).textContent;
+function getDescriptionText(html: string): string {
+  return (
+    document.createRange().createContextualFragment(html).textContent || ""
+  );
 }
 
-function Episode({
+function getDescriptionHTML(html: string) {
+  return <ContextualComponent html={html}></ContextualComponent>;
+}
+
+export default function Episode({
   activeEpisode,
   setActiveEpisode,
   isPlaying,
@@ -103,13 +121,33 @@ function Episode({
   playbackStates,
 }: FeedProps) {
   async function onPressButton() {
-    console.log(episode);
-    setActiveEpisode(episode);
+    console.log(episodeState);
+    setActiveEpisode(episodeState);
     setIsPlaying(!isPlaying);
   }
   const classes = useStyles();
+
+  const location = useLocation();
+  console.log(location);
+  const params = useParams();
+
+  const { client } = usePodcastIndex();
+  const [episodeState, setEpisodeState] = useState(episode);
+
+  async function getPodcastFromRoute() {
+    console.log(params);
+    if (params.hasOwnProperty("episodeId")) {
+      //@ts-ignore
+      const episodeDetails = await client.episodeById(params.episodeId);
+      setEpisodeState(episodeDetails.episode);
+    }
+  }
+  useEffect(() => {
+    getPodcastFromRoute();
+  }, []);
+
   return (
-    <Card>
+    <Card component="article">
       <CardContent>
         <Grid
           container
@@ -119,52 +157,87 @@ function Episode({
           wrap="nowrap"
         >
           <Grid item>
-            <MuiLink
-              component={Link}
-              gutterBottom
-              variant="subtitle2"
-              to={`/episode/${episode.id}`}
-            >
-              {episode.title}
-            </MuiLink>
-            <Typography variant="body2" color="textSecondary" component="p">
-              {getDescriptionText(episode.description)}
-            </Typography>
-            {/* <ContextualComponent html={episode.description} /> */}
+            {episodeState !== undefined ? (
+              location.pathname.includes("episode") ? (
+                <Fragment>
+                  <Typography gutterBottom variant="subtitle2">
+                    {episodeState.title}
+                  </Typography>
+                  {getDescriptionHTML(episodeState.description)}
+                </Fragment>
+              ) : (
+                <Fragment>
+                  <MuiLink
+                    component={Link}
+                    gutterBottom
+                    variant="subtitle2"
+                    to={`/episode/${episodeState.id}`}
+                  >
+                    {episodeState.title}
+                  </MuiLink>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    component="p"
+                    className={classes.text}
+                  >
+                    {getDescriptionText(episodeState.description)}
+                  </Typography>
+                </Fragment>
+              )
+            ) : null}
           </Grid>
           <Grid item xs={2} className={classes.endItems}>
-            <Box>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {new Date(episode.datePublished * 1000).toLocaleDateString()}
-              </Typography>
-              <img
-                src={episode.image}
-                height="48px"
-                width="auto"
-                className={classes.rounded}
-              ></img>
-            </Box>
-            <Box className={classes.play}>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {`${Math.round(episode.duration / 60)} mins`}
-              </Typography>
-              <IconButton onClick={onPressButton}>
-                {isPlaying && activeEpisode?.id === episode.id ? (
-                  <PauseCircleFilledIcon fontSize="large" />
-                ) : (
-                  <PlayCircleFilledIcon fontSize="large" />
-                )}
-              </IconButton>
-            </Box>
+            {episodeState !== undefined ? (
+              <Fragment>
+                <Box>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    component="p"
+                  >
+                    {new Date(
+                      episodeState.datePublished * 1000,
+                    ).toLocaleDateString()}
+                  </Typography>
+                  <img
+                    src={getImage(episodeState.image, episodeState.feedImage)}
+                    height="48px"
+                    width="auto"
+                    className={classes.rounded}
+                  ></img>
+                </Box>
+                <Box className={classes.play}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    component="p"
+                  >
+                    {`${Math.round(episodeState.duration / 60)} mins`}
+                  </Typography>
+                  <IconButton onClick={onPressButton}>
+                    {isPlaying && activeEpisode?.id === episodeState.id ? (
+                      <PauseCircleFilledIcon fontSize="large" />
+                    ) : (
+                      <PlayCircleFilledIcon fontSize="large" />
+                    )}
+                  </IconButton>
+                </Box>
+              </Fragment>
+            ) : null}
           </Grid>
         </Grid>
       </CardContent>
-      <LinearProgress
-        variant="determinate"
-        value={getCurrentPlayback(playbackStates, episode.id, episode.duration)}
-      />
+      {episodeState !== undefined ? (
+        <LinearProgress
+          variant="determinate"
+          value={getCurrentPlayback(
+            playbackStates,
+            episodeState.id,
+            episodeState.duration,
+          )}
+        />
+      ) : null}
     </Card>
   );
 }
-
-export default React.memo(Episode);

@@ -5,15 +5,16 @@ import CardActionArea from "@material-ui/core/CardActionArea";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
-import { Theme, createStyles } from "@material-ui/core/styles";
+import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import React from "react";
+import React, { Fragment } from "react";
 import { useEffect, useState } from "react";
 import { ApiResponse, PIApiPodcast, PIApiFeed } from "../podcast-client/types";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { useHistory, useParams } from "react-router";
 import { Link } from "react-router-dom";
+import { getImage } from "../utils/utils";
 
 type PodcastProps = {
   // playbackStates: Map<number, number>;
@@ -23,6 +24,20 @@ type PodcastProps = {
   podcast: PIApiFeed | undefined;
 };
 
+const useStyles = makeStyles({
+  container: {
+    display: "grid",
+    gridTemplateColumns: "minmax(600px, 3fr) minmax(88px, 96px)",
+    gridTemplateRows: "1fr",
+    gap: "0px 16px",
+    gridAutoFlow: "row",
+    gridTemplateAreas: '"content icon"',
+    alignItems: "center",
+  },
+  content: { gridArea: "content" },
+  icon: { gridArea: "icon", textAlign: "center" },
+});
+
 function Podcast({
   podcast,
   subscriptions,
@@ -30,6 +45,7 @@ function Podcast({
 }: // playbackStates,
 // activeEpisode,
 PodcastProps) {
+  const classes = useStyles();
   const { client } = usePodcastIndex();
   const params = useParams();
 
@@ -83,12 +99,11 @@ PodcastProps) {
   }
 
   return (
-    <Card>
-      <CardContent>
+    <Card component="article">
+      <CardContent className={classes.container}>
         {podcastState !== undefined ? (
-          <React.Fragment>
-            <div></div>
-            <div>
+          <Fragment>
+            <div className={classes.content}>
               <MuiLink
                 component={Link}
                 gutterBottom
@@ -101,16 +116,20 @@ PodcastProps) {
                 {podcastState.description}
               </Typography>
             </div>
-            <img src={podcastState.image} height="80px"></img>
-          </React.Fragment>
+            <div className={classes.icon}>
+              <img
+                src={getImage(podcastState.artwork, podcastState.image)}
+                height="80px"
+                width="auto"
+              ></img>
+            </div>
+          </Fragment>
         ) : null}
       </CardContent>
       <CardActions>
-        <div></div>
         <Button size="small" color="primary" onClick={onPressButton}>
           {alreadySubbed ? "Unsubscribe" : "Subscribe"}
         </Button>
-        <div></div>
       </CardActions>
     </Card>
   );

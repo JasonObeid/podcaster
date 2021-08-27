@@ -1,16 +1,13 @@
 import React from "react";
 // @ts-ignore
-import { PodcastIndexClient } from "../podcast-client/index";
+import { PodcastIndexClient } from "podcastindexjs";
 
 // assumes you have an your key and secret set as environment variables
 // @ts-ignore
-const a: string = import.meta.env.VITE_API_KEY;
+const VITE_API_KEY: string = import.meta.env.VITE_API_KEY;
 // @ts-ignore
-const b: string = import.meta.env.VITE_API_SECRET;
-const VITE_API_KEY = "RBE7535YHVY2VFHJPUDJ";
-const VITE_API_SECRET = "DZmpt7J^vKzbeNwd4EvQUtGQj7wwd6Eq#vwChUL4";
-console.log(a);
-console.log(b);
+const VITE_API_SECRET: string = import.meta.env.VITE_API_SECRET;
+
 const client = new PodcastIndexClient(VITE_API_KEY, VITE_API_SECRET);
 
 type PodcastIndexProviderProps = { children: React.ReactNode };

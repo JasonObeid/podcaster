@@ -18,25 +18,21 @@ import VolumeOffIcon from "@material-ui/icons/VolumeOff";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
-import {
-  ApiResponse,
-  PIApiEpisodeInfo,
-  PIApiPodcast,
-} from "../podcast-client/types";
+import { Types } from "podcastindexjs";
 import { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 
 type PlayerProps = {
   playbackStates: Map<number, number>;
   setPlaybackStates: React.Dispatch<React.SetStateAction<Map<number, number>>>;
-  activeEpisode: PIApiEpisodeInfo | undefined;
+  activeEpisode: Types.PIApiEpisodeInfo | undefined;
   setActiveEpisode: React.Dispatch<
-    React.SetStateAction<PIApiEpisodeInfo | undefined>
+    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
   >;
-  subscriptions: PIApiPodcast[];
+  subscriptions: Types.PIApiPodcast[];
   isPlaying: boolean;
   setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  feed: PIApiEpisodeInfo[];
+  episodes: Types.PIApiEpisodeInfo[];
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -63,7 +59,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
   },
   time: { gridArea: "time", alignItems: "center", margin: "0px 80px" },
-  muteButton: { paddingRight: "16px" },
+  muteButton: { marginRight: "16px" },
 }));
 
 export default function Player({
@@ -74,7 +70,7 @@ export default function Player({
   subscriptions,
   isPlaying,
   setIsPlaying,
-  feed,
+  episodes,
 }: PlayerProps) {
   const classes = useStyles();
   const player = useRef<ReactPlayer | null>(null);
@@ -82,7 +78,7 @@ export default function Player({
   const timeRef = useRef<Map<number, number>>(playbackStates);
   timeRef.current = playbackStates;
 
-  const activeRef = useRef<PIApiEpisodeInfo | undefined>(activeEpisode);
+  const activeRef = useRef<Types.PIApiEpisodeInfo | undefined>(activeEpisode);
   activeRef.current = activeEpisode;
 
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -155,7 +151,7 @@ export default function Player({
   };
 
   function getEpisodeIndexWithinFeed(episodeID: any) {
-    const episodeIDs = feed.map((episode: { id: any }) => episode.id);
+    const episodeIDs = episodes.map((episode: { id: any }) => episode.id);
     const isEpisodeID = (episode: any) => episode === episodeID;
     const index = episodeIDs.findIndex(isEpisodeID);
     console.log(index);
@@ -164,11 +160,11 @@ export default function Player({
 
   const handlePrevious = (episodeID: any) => {
     const index = getEpisodeIndexWithinFeed(episodeID);
-    const newIndex = index < feed.length ? index + 1 : feed.length - 1;
+    const newIndex = index < episodes.length ? index + 1 : episodes.length - 1;
     console.log(newIndex);
     if (index !== newIndex) {
-      console.log(feed[newIndex]);
-      setActiveEpisode(feed[newIndex]);
+      console.log(episodes[newIndex]);
+      setActiveEpisode(episodes[newIndex]);
     }
   };
 
@@ -177,8 +173,8 @@ export default function Player({
     const newIndex = index > 0 ? index - 1 : 0;
     console.log(newIndex);
     if (index !== newIndex) {
-      console.log(feed[newIndex]);
-      setActiveEpisode(feed[newIndex]);
+      console.log(episodes[newIndex]);
+      setActiveEpisode(episodes[newIndex]);
     }
   };
 
@@ -189,6 +185,7 @@ export default function Player({
           {isMuted ? <ShuffleIcon /> : <ShuffleIcon />}
         </IconButton>
         <IconButton
+          aria-label="play previous"
           onClick={() =>
             activeEpisode !== undefined
               ? handlePrevious(activeEpisode.id)
@@ -198,6 +195,7 @@ export default function Player({
           <SkipPreviousIcon />
         </IconButton>
         <IconButton
+          aria-label={isPlaying ? "pause" : "play"}
           onClick={() =>
             activeEpisode !== undefined ? setIsPlaying(!isPlaying) : null
           }
@@ -209,18 +207,26 @@ export default function Player({
           )}
         </IconButton>
         <IconButton
+          aria-label="play next"
           onClick={() =>
             activeEpisode !== undefined ? handleNext(activeEpisode.id) : null
           }
         >
           <SkipNextIcon />
         </IconButton>
-        <IconButton onClick={handleNext}>
+        <IconButton
+          aria-label={isMuted ? "repeat" : "no repeat"}
+          onClick={handleNext}
+        >
           {isMuted ? <RepeatIcon /> : <RepeatIcon />}
         </IconButton>
       </div>
       <div className={classes.volume}>
-        <IconButton onClick={handleMuteChange} className={classes.muteButton}>
+        <IconButton
+          aria-label={isMuted ? "unmute" : "mute"}
+          onClick={handleMuteChange}
+          className={classes.muteButton}
+        >
           {isMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
         </IconButton>
         <Slider
@@ -247,7 +253,6 @@ export default function Player({
           height={0}
         />
         <Slider
-          className={classes.slider}
           value={getCurrentPlayback()}
           getAriaValueText={() =>
             activeEpisode !== undefined

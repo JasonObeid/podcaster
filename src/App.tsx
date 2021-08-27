@@ -1,19 +1,17 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  RouteComponentProps,
+  useHistory,
+} from "react-router-dom";
+import { auth, database, ref, onValue } from "./config/firebase";
 import IconButton from "@material-ui/core/IconButton";
 import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Route,
-  BrowserRouter as Router,
-  Switch,
-  useHistory,
-} from "react-router-dom";
 import { usePodcastIndex } from "./context/PodcastIndexContext";
-import {
-  PIApiEpisodeInfo,
-  PIApiFeed,
-  PIApiPodcast,
-} from "./podcast-client/types";
+import { Types, PodcastIndexClient } from "podcastindexjs";
 import Sidebar from "./components/Sidebar";
 import Player from "./components/Player";
 import Feeds from "./components/Feeds";
@@ -25,7 +23,12 @@ import Podcast from "./components/Podcast";
 import catIcon from "./assets/cat.svg";
 import Button from "@material-ui/core/Button";
 import Episode from "./components/Episode";
-import { getImage } from "./utils/utils";
+import { getImage, useQueriesTyped } from "./utils/utils";
+import { useQueries, useQuery } from "react-query";
+import Login from "./components/Login";
+import { User } from "firebase/auth";
+import { child, get } from "firebase/database";
+
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "grid",
@@ -72,7 +75,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingLeft: "8px",
   },
 }));
+
 function isHistoryLeaf(history: any) {
+  // history.;
   // if (!history) return false;
 
   // if (history.length === 1) return true;
@@ -80,94 +85,102 @@ function isHistoryLeaf(history: any) {
   // return history.location.pathname === history.entries[0].pathname;
   return true;
 }
+
 function isHistoryRoot(history: any) {
   // if (!history) return false;
 
   // if (history.length === 1) return true;
 
   // return history.location.pathname === history.entries[0].pathname;
+  console.log(history.entries);
   return true;
 }
-export function App() {
+
+function App() {
+  const [loading, setLoading] = useState<boolean>(true);
+
+  function getRemoteStates() {}
+  // Monitor and Update user state.
+  useEffect(() => {
+    setLoading(true);
+    if (auth.currentUser !== null) {
+      console.log("User detected.");
+      // const subscriptionsRef = ref(
+      //   database,
+      //   `users/${auth.currentUser.uid}/subscriptions`,
+      // );
+      get(child(ref(database), `users/${auth.currentUser.uid}/subscriptions`))
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            console.log(snapshot.val());
+            const data = snapshot.val();
+            setSubscriptions(data);
+          } else {
+            console.log("No data available");
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      // onValue(subscriptionsRef, (snapshot) => {
+      //   const data = snapshot.val();
+      //   setSubscriptions(data);
+      // });
+    } else {
+      console.log("No user detected");
+    }
+    setLoading(false);
+  }, []);
+
   const classes = useStyles();
+
   const history = useHistory();
-  console.log(history);
+
   const { client } = usePodcastIndex();
 
-  const [subscriptions, setSubscriptions] = useState<PIApiPodcast[]>([]);
-  const [feed, setFeed] = useState<PIApiEpisodeInfo[]>([]);
-
-  // const storage = localStorage.getItem("userIsLoggedIn");
-  // const initialLogin = storage !== null ? storage : false;
-  // const [userIsLoggedIn, setUserIsLoggedIn] = useState(initialLogin);
-
-  //search
-  const [searchResults, setSearchResults] = useState<PIApiFeed[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Types.PIApiPodcast[]>([]);
 
   //playback
   const [playbackStates, setPlaybackStates] = useState<Map<number, number>>(
     new Map<number, number>(),
   );
   const [activeEpisode, setActiveEpisode] = useState<
-    PIApiEpisodeInfo | undefined
+    Types.PIApiEpisodeInfo | undefined
   >(undefined);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  const isInitialMount = useRef(false);
-
-  // async function test() {
-  //   const podcasts = await client.search("syntax fm");
-  //   console.log(podcasts);
-  //   const episode = await client.episodesByFeedId(podcasts.feeds[0].id);
-  //   console.log(episode);
-  //   setActiveEpisode(episode.items[0]);
-  // }
-  // useEffect(() => {
-  //   test();
-  // }, []);
-
-  // async function getStoredState() {
-  //   const response = await getPodcaster(uuid);
-  //   console.log(response);
-  //   const newPlaybackStates = JSON.parse(response.playbackStates, reviver);
-  //   console.log(newPlaybackStates);
-  //   setSubscriptions(response.subscriptions);
-  //   setPlaybackStates(newPlaybackStates);
-  //   setActiveEpisode(response.activeEpisode);
-  // }
-  // // async function getSubscriptionsDetails() {
-  // //   const response = await returnPost("api/getSubscriptionsDetails", {
-  // //     subscriptions: subscriptions,
-  // //   });
-  // //   setSubscriptionDetails(response);
-  // //   console.log(response);
-  // // }
-  async function getFeedEpisodes() {
-    const episodes: PIApiEpisodeInfo[] = [];
-    subscriptions.forEach(async function (sub) {
-      const subscriptionEpisodes = await client.episodesByFeedId(sub.id, {
-        max: 10,
-        fulltext: true,
-      });
-      subscriptionEpisodes.items.forEach((episode) => episodes.push(episode));
+  async function getFeedEpisodes(feedId: number) {
+    const subscriptionEpisodes = await client.episodesByFeedId(feedId, {
+      max: 10,
+      fulltext: true,
     });
-
-    const sortedEpisodes = episodes.sort(function (a, b) {
-      const dateA = a.datePublished;
-      const dateB = b.datePublished;
-      if (dateA === dateB) return 0;
-
-      return dateA < dateB ? -1 : 1;
-    });
-    setFeed(sortedEpisodes);
+    return subscriptionEpisodes.items;
   }
 
-  // // useEffect(() => {
-  // //   //get();
-  // //   getStoredState();
-  // // }, []);
+  const userQueries = useQueriesTyped(
+    subscriptions.map((sub) => {
+      return {
+        queryKey: ["episodesByFeedId", sub.id],
+        queryFn: () => getFeedEpisodes(sub.id),
+      };
+    }),
+  );
 
-  // // //}, [volume]);
+  // const episodes = userQueries
+  //   .filter((feedQuery): feedQuery.data is Types.PIApiFeed => feedQuery.isSuccess && feedQuery.data !== undefined)
+  //   .map((feedQuery) => feedQuery.data);
+
+  const episodes = userQueries.flatMap((feedQuery) =>
+    feedQuery.isSuccess && feedQuery.data !== undefined ? feedQuery.data : [],
+  );
+
+  const sortedEpisodes = episodes.flat().sort(function (a, b) {
+    const dateA = a.datePublished;
+    const dateB = b.datePublished;
+    if (dateA === dateB) return 0;
+
+    return dateA < dateB ? -1 : 1;
+  });
 
   function getEpisodeAuthor(subscriptions: any[], feedId: any) {
     const subscription = subscriptions.find(
@@ -176,13 +189,6 @@ export function App() {
     if (subscription) return subscription.author;
     return "";
   }
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      getFeedEpisodes();
-    }
-  }, [subscriptions]);
 
   return (
     <Router>
@@ -220,24 +226,20 @@ export function App() {
           <Switch>
             <Route path="/search/:term">
               <Search
-                searchResults={searchResults}
-                setSearchResults={setSearchResults}
                 subscriptions={subscriptions}
                 setSubscriptions={setSubscriptions}
               />
             </Route>
             <Route path="/search">
               <Search
-                searchResults={searchResults}
-                setSearchResults={setSearchResults}
                 subscriptions={subscriptions}
                 setSubscriptions={setSubscriptions}
               />
             </Route>
             <Route exact path="/feed">
               <Feeds
+                episodes={sortedEpisodes}
                 playbackStates={playbackStates}
-                feed={feed}
                 activeEpisode={activeEpisode}
                 setActiveEpisode={setActiveEpisode}
                 isPlaying={isPlaying}
@@ -246,8 +248,8 @@ export function App() {
             </Route>
             <Route exact path="/episode/:episodeId">
               <Episode
+                episodeId={undefined}
                 playbackStates={playbackStates}
-                episode={undefined}
                 activeEpisode={activeEpisode}
                 setActiveEpisode={setActiveEpisode}
                 isPlaying={isPlaying}
@@ -258,28 +260,38 @@ export function App() {
               <Subscriptions
                 subscriptions={subscriptions}
                 setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
               />
             </Route>
             <Route exact path="/settings">
-              <div></div>
+              <Login></Login>
             </Route>
             <Route exact path="/podcast/:podcastId">
               <Podcast
-                podcast={undefined}
+                podcastId={undefined}
                 subscriptions={subscriptions}
                 setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
               ></Podcast>
             </Route>
           </Switch>
         </main>
         <footer className={classes.controls}>
           <Player
+            episodes={sortedEpisodes}
             playbackStates={playbackStates}
             activeEpisode={activeEpisode}
             subscriptions={subscriptions}
             isPlaying={isPlaying}
             setIsPlaying={setIsPlaying}
-            feed={feed}
             setPlaybackStates={setPlaybackStates}
             setActiveEpisode={setActiveEpisode}
           />
@@ -311,4 +323,4 @@ export function App() {
   );
 }
 
-export default React.memo(App);
+export default App;

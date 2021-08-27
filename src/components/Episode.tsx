@@ -19,13 +19,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ApiResponse, PIApiEpisodeInfo } from "../podcast-client/types";
+import { Types } from "podcastindexjs";
 import { makeStyles } from "@material-ui/styles";
 import { Link as MuiLink } from "@material-ui/core";
 import { useHistory, useLocation, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { getImage } from "../utils/utils";
+import { useQuery } from "react-query";
 const useStyles = makeStyles({
   endItems: {
     display: "flex",
@@ -49,20 +50,14 @@ const useStyles = makeStyles({
   },
 });
 
-// function cleanText(text: string) {
-//   const trimmedArray = text.slice(0, 150).split(" ");
-//   const truncateLastWord = trimmedArray.slice(0, trimmedArray.length - 1);
-//   return truncateLastWord.join(" ") + "...";
-// }
-
 type FeedProps = {
-  activeEpisode: PIApiEpisodeInfo | undefined;
+  episodeId: number | undefined;
+  activeEpisode: Types.PIApiEpisodeInfo | undefined;
   setActiveEpisode: React.Dispatch<
-    React.SetStateAction<PIApiEpisodeInfo | undefined>
+    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
   >;
   isPlaying: boolean;
   setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  episode: PIApiEpisodeInfo | undefined;
   playbackStates: Map<number, number>;
 };
 
@@ -113,57 +108,73 @@ function getDescriptionHTML(html: string) {
 }
 
 export default function Episode({
+  episodeId,
   activeEpisode,
   setActiveEpisode,
   isPlaying,
   setIsPlaying,
-  episode,
   playbackStates,
 }: FeedProps) {
   async function onPressButton() {
-    console.log(episodeState);
-    setActiveEpisode(episodeState);
-    setIsPlaying(!isPlaying);
+    if (data !== undefined) {
+      setActiveEpisode(episode);
+      setIsPlaying(!isPlaying);
+    }
   }
   const classes = useStyles();
 
   const location = useLocation();
-  console.log(location);
   const params = useParams();
 
   const { client } = usePodcastIndex();
-  const [episodeState, setEpisodeState] = useState(episode);
+  const [episodeIdState, setEpisodeIdState] = useState<number | null>(null);
 
-  async function getPodcastFromRoute() {
-    console.log(params);
-    if (params.hasOwnProperty("episodeId")) {
-      //@ts-ignore
-      const episodeDetails = await client.episodeById(params.episodeId);
-      setEpisodeState(episodeDetails.episode);
+  async function fetchEpisode() {
+    if (episodeIdState !== null) {
+      const resp = await client.episodeById(episodeIdState);
+      return resp;
     }
   }
+
+  const { isLoading, isError, data, error } = useQuery(
+    `episodeById/${episodeIdState}`,
+    fetchEpisode,
+  );
+  const episode = data?.episode;
+
+  async function getEpisodeFromId() {
+    console.log(params);
+    if (episodeId !== undefined) {
+      setEpisodeIdState(episodeId);
+    }
+    if (params.hasOwnProperty("episodeId")) {
+      //@ts-ignore
+      setEpisodeIdState(params.episodeId);
+    }
+  }
+
   useEffect(() => {
-    getPodcastFromRoute();
+    getEpisodeFromId();
   }, []);
 
-  return (
-    <Card component="article">
-      <CardContent>
-        <Grid
-          container
-          spacing={1}
-          alignItems="center"
-          justifyContent="space-between"
-          wrap="nowrap"
-        >
-          <Grid item>
-            {episodeState !== undefined ? (
-              location.pathname.includes("episode") ? (
+  if (episode !== undefined)
+    return (
+      <Card component="article">
+        <CardContent>
+          <Grid
+            container
+            spacing={1}
+            alignItems="center"
+            justifyContent="space-between"
+            wrap="nowrap"
+          >
+            <Grid item xs={9}>
+              {location.pathname.includes("episode") ? (
                 <Fragment>
                   <Typography gutterBottom variant="subtitle2">
-                    {episodeState.title}
+                    {episode.title}
                   </Typography>
-                  {getDescriptionHTML(episodeState.description)}
+                  {getDescriptionHTML(episode.description)}
                 </Fragment>
               ) : (
                 <Fragment>
@@ -171,9 +182,9 @@ export default function Episode({
                     component={Link}
                     gutterBottom
                     variant="subtitle2"
-                    to={`/episode/${episodeState.id}`}
+                    to={`/episode/${episode.id}`}
                   >
-                    {episodeState.title}
+                    {episode.title}
                   </MuiLink>
                   <Typography
                     variant="body2"
@@ -181,14 +192,12 @@ export default function Episode({
                     component="p"
                     className={classes.text}
                   >
-                    {getDescriptionText(episodeState.description)}
+                    {getDescriptionText(episode.description)}
                   </Typography>
                 </Fragment>
-              )
-            ) : null}
-          </Grid>
-          <Grid item xs={2} className={classes.endItems}>
-            {episodeState !== undefined ? (
+              )}
+            </Grid>
+            <Grid item xs={3} className={classes.endItems}>
               <Fragment>
                 <Box>
                   <Typography
@@ -197,11 +206,11 @@ export default function Episode({
                     component="p"
                   >
                     {new Date(
-                      episodeState.datePublished * 1000,
+                      episode.datePublished * 1000,
                     ).toLocaleDateString()}
                   </Typography>
                   <img
-                    src={getImage(episodeState.image, episodeState.feedImage)}
+                    src={getImage(episode.image, episode.feedImage)}
                     height="48px"
                     width="auto"
                     className={classes.rounded}
@@ -213,10 +222,10 @@ export default function Episode({
                     color="textSecondary"
                     component="p"
                   >
-                    {`${Math.round(episodeState.duration / 60)} mins`}
+                    {`${Math.round(episode.duration / 60)} mins`}
                   </Typography>
                   <IconButton onClick={onPressButton}>
-                    {isPlaying && activeEpisode?.id === episodeState.id ? (
+                    {isPlaying && activeEpisode?.id === episode.id ? (
                       <PauseCircleFilledIcon fontSize="large" />
                     ) : (
                       <PlayCircleFilledIcon fontSize="large" />
@@ -224,20 +233,18 @@ export default function Episode({
                   </IconButton>
                 </Box>
               </Fragment>
-            ) : null}
+            </Grid>
           </Grid>
-        </Grid>
-      </CardContent>
-      {episodeState !== undefined ? (
+        </CardContent>
         <LinearProgress
           variant="determinate"
           value={getCurrentPlayback(
             playbackStates,
-            episodeState.id,
-            episodeState.duration,
+            episode.id,
+            episode.duration,
           )}
         />
-      ) : null}
-    </Card>
-  );
+      </Card>
+    );
+  return null;
 }

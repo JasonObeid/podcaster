@@ -1,27 +1,32 @@
 import { Link as MuiLink } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
-import { Theme, createStyles, makeStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
+import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import React, { Fragment } from "react";
 import { useEffect, useState } from "react";
-import { ApiResponse, PIApiPodcast, PIApiFeed } from "../podcast-client/types";
+import { Types } from "podcastindexjs";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
-import { useHistory, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { getImage } from "../utils/utils";
+import Feeds from "./Feeds";
+import { useQuery } from "react-query";
+import { auth, database, ref, set } from "../config/firebase";
 
 type PodcastProps = {
-  // playbackStates: Map<number, number>;
-  // activeEpisode: PIApiEpisodeInfo | undefined;
-  subscriptions: PIApiPodcast[];
-  setSubscriptions: React.Dispatch<React.SetStateAction<PIApiPodcast[]>>;
-  podcast: PIApiFeed | undefined;
+  podcastId: number | undefined;
+  subscriptions: Types.PIApiPodcast[];
+  setSubscriptions: React.Dispatch<React.SetStateAction<Types.PIApiPodcast[]>>;
+  activeEpisode: Types.PIApiEpisodeInfo | undefined;
+  setActiveEpisode: React.Dispatch<
+    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
+  >;
+  isPlaying: boolean;
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  playbackStates: Map<number, number>;
 };
 
 const useStyles = makeStyles({
@@ -34,104 +39,176 @@ const useStyles = makeStyles({
     gridTemplateAreas: '"content icon"',
     alignItems: "center",
   },
+  podcast: { marginBottom: "48px" },
   content: { gridArea: "content" },
   icon: { gridArea: "icon", textAlign: "center" },
 });
 
 function Podcast({
-  podcast,
+  podcastId,
+  activeEpisode,
+  setActiveEpisode,
+  isPlaying,
+  setIsPlaying,
+  playbackStates,
   subscriptions,
   setSubscriptions,
-}: // playbackStates,
-// activeEpisode,
-PodcastProps) {
+}: PodcastProps) {
   const classes = useStyles();
+
   const { client } = usePodcastIndex();
+
   const params = useParams();
+  const location = useLocation();
 
-  const [podcastState, setPodcastState] = useState(podcast);
+  const [podcastIdState, setPodcastIdState] = useState<number | undefined>(
+    undefined,
+  );
+  const [feedId, setFeedId] = useState<number | undefined>(undefined);
 
-  async function getPodcastFromRoute() {
-    console.log(params);
-    if (params.hasOwnProperty("podcastId")) {
+  const fetchedPodcast = useQuery(
+    `podcastById/${podcastIdState}`,
+    getPodcastFromId,
+  );
+  const podcast = fetchedPodcast?.data;
+
+  const fetchedFeed = useQuery(
+    `episodesByFeedId/${feedId}`,
+    getFeedFromPodcastId,
+  );
+  const feed = fetchedFeed?.data;
+
+  async function getPodcastFromId() {
+    if (podcastIdState !== undefined) {
       //@ts-ignore
-      const podcast = await client.podcastById(params.podcastId);
-      setPodcastState(podcast.feed);
+      const podcast = await client.podcastById(podcastIdState);
+      setFeedId(podcast.feed.id);
+      return podcast.feed;
     }
   }
+
+  async function getFeedFromPodcastId() {
+    if (feedId !== undefined && podcast !== undefined) {
+      const episodes = await client.episodesByFeedId(feedId);
+      return episodes.items;
+    }
+  }
+
+  async function getPodcastId() {
+    if (podcastId !== undefined) {
+      setPodcastIdState(podcastId);
+    }
+    if (params.hasOwnProperty("podcastId")) {
+      console.log(params);
+      //@ts-ignore
+      setPodcastIdState(params.podcastId);
+    }
+  }
+
   useEffect(() => {
-    getPodcastFromRoute();
+    getPodcastId();
   }, []);
 
-  const [alreadySubbed, setAlreadySubbed] = useState(
-    podcastState !== undefined &&
-      subscriptions.map((sub) => sub.id).includes(podcastState.id),
-  );
-
-  useEffect(() => {
-    if (podcastState !== undefined) {
-      const alreadySubbed = subscriptions
-        .map((sub) => sub.id)
-        .includes(podcastState.id);
-      setAlreadySubbed(alreadySubbed);
-    }
-  }, [subscriptions]);
+  function isSubscribed() {
+    return (
+      podcast !== undefined &&
+      subscriptions.map((sub) => sub.id).includes(podcast.id)
+    );
+  }
 
   async function onPressButton() {
-    alreadySubbed ? unsubscribe() : subscribe();
+    isSubscribed() ? unsubscribe() : subscribe();
   }
+
   async function subscribe() {
-    if (podcastState !== undefined) {
-      const newSubscription = await client.podcastById(podcastState.id);
+    if (podcast !== undefined) {
+      const newSubscription = await client.podcastById(podcast.id);
       const newSubscriptions = [...subscriptions, newSubscription.feed];
       console.log(newSubscriptions);
       setSubscriptions(newSubscriptions);
+      const user = auth.currentUser;
+      if (user !== null) {
+        set(ref(database, `users/${user.uid}/subscriptions`), newSubscriptions);
+      }
     }
   }
+
   async function unsubscribe() {
-    if (podcastState !== undefined) {
+    if (podcast !== undefined) {
       const newSubscriptions = subscriptions.filter((subscription) => {
-        return subscription.id !== podcastState.id;
+        return subscription.id !== podcast.id;
       });
       console.log(newSubscriptions);
       setSubscriptions(newSubscriptions);
+      const user = auth.currentUser;
+      if (user !== null) {
+        set(ref(database, `users/${user.uid}/subscriptions`), newSubscriptions);
+      }
     }
   }
 
   return (
-    <Card component="article">
-      <CardContent className={classes.container}>
-        {podcastState !== undefined ? (
-          <Fragment>
-            <div className={classes.content}>
-              <MuiLink
-                component={Link}
-                gutterBottom
-                variant="h5"
-                to={`/podcast/${podcastState.id}`}
-              >
-                {podcastState.title}
-              </MuiLink>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {podcastState.description}
-              </Typography>
-            </div>
-            <div className={classes.icon}>
-              <img
-                src={getImage(podcastState.artwork, podcastState.image)}
-                height="80px"
-                width="auto"
-              ></img>
-            </div>
-          </Fragment>
-        ) : null}
-      </CardContent>
-      <CardActions>
-        <Button size="small" color="primary" onClick={onPressButton}>
-          {alreadySubbed ? "Unsubscribe" : "Subscribe"}
-        </Button>
-      </CardActions>
-    </Card>
+    <Fragment>
+      {podcast !== undefined ? (
+        <Card
+          component="article"
+          className={
+            location.pathname.includes("podcast") ? classes.podcast : ""
+          }
+        >
+          <CardContent className={classes.container}>
+            <Fragment>
+              <div className={classes.content}>
+                {location.pathname.includes("podcast") ? (
+                  <Typography variant="h5" component="h5" gutterBottom>
+                    {podcast.title}
+                  </Typography>
+                ) : (
+                  <MuiLink
+                    component={Link}
+                    gutterBottom
+                    variant="h5"
+                    to={`/podcast/${podcast.id}`}
+                  >
+                    {podcast.title}
+                  </MuiLink>
+                )}
+                <Typography variant="body2" color="textSecondary" component="p">
+                  {podcast.description}
+                </Typography>
+              </div>
+              <div className={classes.icon}>
+                <img
+                  src={getImage(podcast.artwork, podcast.image)}
+                  height="80px"
+                  width="auto"
+                ></img>
+              </div>
+            </Fragment>
+          </CardContent>
+          <CardActions>
+            <Button size="small" color="primary" onClick={onPressButton}>
+              {isSubscribed() ? "Unsubscribe" : "Subscribe"}
+            </Button>
+          </CardActions>
+        </Card>
+      ) : null}
+      {feed !== undefined && location.pathname.includes("podcast") ? (
+        <Fragment>
+          <Typography variant="h6" component="h6">
+            Episodes
+          </Typography>
+          <Feeds
+            episodes={feed}
+            playbackStates={playbackStates}
+            activeEpisode={activeEpisode}
+            setActiveEpisode={setActiveEpisode}
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
+          ></Feeds>
+        </Fragment>
+      ) : null}
+    </Fragment>
   );
 }
 export default React.memo(Podcast);

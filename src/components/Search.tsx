@@ -6,34 +6,26 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import { Link } from "react-router-dom";
-import { ApiResponse, PIApiPodcast, PIApiFeed } from "../podcast-client/types";
+import { Types } from "podcastindexjs";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 
 import { makeStyles } from "@material-ui/styles";
 import Podcast from "./Podcast";
 import Box from "@material-ui/core/Box";
+import { useQuery } from "react-query";
 
 type SearchProps = {
   // playbackStates: Map<number, number>;
   // activeEpisode: PIApiEpisodeInfo | undefined;
-  subscriptions: PIApiPodcast[];
-  setSubscriptions: React.Dispatch<React.SetStateAction<PIApiPodcast[]>>;
-  searchResults: PIApiFeed[];
-  setSearchResults: React.Dispatch<React.SetStateAction<PIApiFeed[]>>;
+  subscriptions: Types.PIApiPodcast[];
+  setSubscriptions: React.Dispatch<React.SetStateAction<Types.PIApiPodcast[]>>;
 };
 
 const useStyles = makeStyles({
   search: { width: "75%" },
 });
 
-function Search({
-  // playbackStates,
-  // activeEpisode,
-  subscriptions,
-  setSubscriptions,
-  searchResults,
-  setSearchResults,
-}: SearchProps) {
+function Search({ subscriptions, setSubscriptions }: SearchProps) {
   const classes = useStyles();
 
   const history = useHistory();
@@ -49,17 +41,27 @@ function Search({
       if (params.term !== "" && params.term !== searchText) {
         //@ts-ignore
         const initialText = params.term;
-        fetchData(initialText);
         setSearchText(initialText);
       }
     }
   }, []);
 
-  async function fetchData(text = searchText) {
-    history.push(`/search/${searchText}`);
-    const searchResults = await client.search(text);
-    setSearchResults(searchResults.feeds);
+  const fetchedPodcast = useQuery(
+    `search/${searchText}`,
+    getSearchResultsFromText,
+  );
+  const searchResults = fetchedPodcast?.data;
+
+  async function getSearchResultsFromText() {
+    if (searchText !== "") {
+      history.push(`/search/${searchText}`);
+      const searchResults = await client.search(searchText);
+      return searchResults.feeds;
+    }
   }
+
+  //Types.PIApiFeed[]
+  async function fetchData() {}
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(event.target.value);
@@ -72,7 +74,7 @@ function Search({
         flexGrow={1}
         alignItems="center"
         justifyContent="space-between"
-        marginBottom="16px"
+        marginBottom="32px"
       >
         <TextField
           id="standard-search"
@@ -93,17 +95,18 @@ function Search({
         </Button>
       </Box>
       <Grid container spacing={3} direction="column" alignItems="stretch">
-        {searchResults.map((podcast) => (
-          <Grid item key={podcast.id} component="article">
-            <Podcast
-              podcast={podcast}
-              subscriptions={subscriptions}
-              setSubscriptions={setSubscriptions}
-              // playbackStates={playbackStates}
-              // activeEpisode={activeEpisode}
-            ></Podcast>
-          </Grid>
-        ))}
+        {searchResults !== undefined &&
+          searchResults.map((podcast) => (
+            <Grid item key={podcast.id} component="article">
+              <Podcast
+                podcastId={podcast.id}
+                subscriptions={subscriptions}
+                setSubscriptions={setSubscriptions}
+                // playbackStates={playbackStates}
+                // activeEpisode={activeEpisode}
+              ></Podcast>
+            </Grid>
+          ))}
       </Grid>
     </React.Fragment>
   );

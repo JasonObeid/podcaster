@@ -11,7 +11,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { ThemeProvider, createTheme } from "@material-ui/core";
 import "./index.css";
-
+import { QueryClient, QueryClientProvider } from "react-query";
 const theme = createTheme({
   palette: {
     primary: {
@@ -22,14 +22,19 @@ const theme = createTheme({
     },
   },
 });
+
+const queryClient = new QueryClient();
+
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <PodcastIndexProvider>
-        <ThemeProvider theme={theme}>
-          <App />
-        </ThemeProvider>
-      </PodcastIndexProvider>
+      <QueryClientProvider client={queryClient}>
+        <PodcastIndexProvider>
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+        </PodcastIndexProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root"),

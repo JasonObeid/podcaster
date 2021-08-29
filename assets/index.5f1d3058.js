@@ -810,7 +810,7 @@ function Header() {
     onClick: () => history.goForward()
   }, /* @__PURE__ */ React.createElement(default_1$9, null)));
 }
-var catIcon = "/assets/cat.bd0d0283.svg";
+var catIcon = "/podcaster/assets/cat.bd0d0283.svg";
 const useStyles$2 = makeStyles((theme2) => ({
   button: {
     display: "flex",
@@ -1393,7 +1393,7 @@ const theme = createTheme({
 });
 const queryClient = new QueryClient();
 ReactDOM.render(/* @__PURE__ */ React.createElement(React.StrictMode, null, /* @__PURE__ */ React.createElement(BrowserRouter, {
-  basename: "/"
+  basename: "/podcaster"
 }, /* @__PURE__ */ React.createElement(QueryClientProvider, {
   client: queryClient
 }, /* @__PURE__ */ React.createElement(PodcastIndexProvider, null, /* @__PURE__ */ React.createElement(ThemeProvider, {

@@ -15,7 +15,10 @@ import { getImage } from "../utils/utils";
 import Feeds from "./Feeds";
 import { useQuery } from "react-query";
 import { auth, database, ref, set } from "../config/firebase";
-
+import {
+  updatePlaybackDatabase,
+  updateSubscriptionsDatabase,
+} from "../utils/databaseMutations";
 type PodcastProps = {
   podcastId: number | undefined;
   subscriptions: Types.PIApiPodcast[];
@@ -34,14 +37,22 @@ const useStyles = makeStyles({
     display: "grid",
     gridTemplateColumns: "minmax(600px, 3fr) minmax(88px, 96px)",
     gridTemplateRows: "1fr",
-    gap: "0px 16px",
+    gap: "0px 24px",
     gridAutoFlow: "row",
     gridTemplateAreas: '"content icon"',
     alignItems: "center",
   },
   podcast: { marginBottom: "48px" },
   content: { gridArea: "content" },
-  icon: { gridArea: "icon", textAlign: "center" },
+  icon: {
+    gridArea: "icon",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rounded: {
+    borderRadius: "8px",
+  },
 });
 
 function Podcast({
@@ -99,7 +110,6 @@ function Podcast({
       setPodcastIdState(podcastId);
     }
     if (params.hasOwnProperty("podcastId")) {
-      console.log(params);
       //@ts-ignore
       setPodcastIdState(params.podcastId);
     }
@@ -124,12 +134,8 @@ function Podcast({
     if (podcast !== undefined) {
       const newSubscription = await client.podcastById(podcast.id);
       const newSubscriptions = [...subscriptions, newSubscription.feed];
-      console.log(newSubscriptions);
       setSubscriptions(newSubscriptions);
-      const user = auth.currentUser;
-      if (user !== null) {
-        set(ref(database, `users/${user.uid}/subscriptions`), newSubscriptions);
-      }
+      updateSubscriptionsDatabase(newSubscriptions, auth.currentUser);
     }
   }
 
@@ -138,12 +144,8 @@ function Podcast({
       const newSubscriptions = subscriptions.filter((subscription) => {
         return subscription.id !== podcast.id;
       });
-      console.log(newSubscriptions);
       setSubscriptions(newSubscriptions);
-      const user = auth.currentUser;
-      if (user !== null) {
-        set(ref(database, `users/${user.uid}/subscriptions`), newSubscriptions);
-      }
+      updateSubscriptionsDatabase(newSubscriptions, auth.currentUser);
     }
   }
 
@@ -179,6 +181,7 @@ function Podcast({
               </div>
               <div className={classes.icon}>
                 <img
+                  className={classes.rounded}
                   src={getImage(podcast.artwork, podcast.image)}
                   height="80px"
                   width="auto"

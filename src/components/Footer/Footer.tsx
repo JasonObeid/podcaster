@@ -1,0 +1,382 @@
+import IconButton from "@material-ui/core/IconButton";
+import Slider from "@material-ui/core/Slider";
+import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
+import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
+import RepeatIcon from "@material-ui/icons/Repeat";
+import ShuffleIcon from "@material-ui/icons/Shuffle";
+import SkipNextIcon from "@material-ui/icons/SkipNext";
+import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
+import VolumeOffIcon from "@material-ui/icons/VolumeOff";
+import VolumeUpIcon from "@material-ui/icons/VolumeUp";
+import React, { useEffect, useRef, useState } from "react";
+import { Theme } from "@material-ui/core";
+import { makeStyles } from "@material-ui/styles";
+import { auth, database, ref } from "../../config/firebase";
+import { Controls, FooterProps } from "../../types/footer";
+import { get } from "firebase/database";
+import {
+  updatePlaybackDatabase,
+  updateControlsDatabase,
+  updateActiveEpisodeDatabase,
+} from "../../utils/databaseMutations";
+import {
+  convertSecondsToTime,
+  isControls,
+  isPlayback,
+  reviver,
+} from "../../utils/utils";
+import { User } from "firebase/auth";
+import Player from "./Player";
+import Typography from "@material-ui/core/Typography";
+import { useDebounce } from "@react-hook/debounce";
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 9fr) minmax(0, 2fr)",
+    gridTemplateRows: "minmax(0, 2fr) minmax(0, 1fr)",
+    gap: "0px 8px",
+    gridAutoFlow: "row",
+    gridTemplateAreas: '"playback volume" "time volume"',
+    height: "100%",
+  },
+  playback: {
+    gridArea: "playback",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: "0px 80px",
+  },
+  volume: {
+    gridArea: "volume",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  time: {
+    gridArea: "time",
+    alignItems: "center",
+    margin: "0px 80px",
+    display: "flex",
+  },
+  playbackTimer: { marginInline: "24px" },
+  muteButton: { marginRight: "16px" },
+}));
+
+export default function Footer({
+  playbackStates,
+  setPlaybackStates,
+  activeEpisode,
+  setActiveEpisode,
+  isPlaying,
+  setIsPlaying,
+  episodes,
+}: FooterProps) {
+  const classes = useStyles();
+
+  const playerRef = useRef(null);
+
+  function getAudioElement() {
+    if (playerRef !== null && playerRef.current !== null) {
+      const audioElement: HTMLAudioElement =
+        //@ts-ignore
+        playerRef.current.audioEl.current;
+
+      return audioElement;
+    }
+  }
+
+  useEffect(() => {
+    const audioElement = getAudioElement();
+    if (audioElement !== undefined) {
+      if (isPlaying) {
+        audioElement.play();
+      } else {
+        audioElement.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  const [controls, setControls] = useState<Controls>({
+    isMuted: false,
+    isShuffle: false,
+    isRepeat: false,
+    volume: 0.15,
+  });
+
+  async function loadPlaybackStateFromDatabase(user: User) {
+    const playbackRef = ref(database, `users/${user.uid}/playback`);
+    get(playbackRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+
+        if (isPlayback(data)) {
+          const playback: Map<number, number> = JSON.parse(data, reviver);
+          setPlaybackStates(playback);
+        }
+      }
+    });
+  }
+
+  async function loadControlsStateFromDatabase(user: User) {
+    const controlsRef = ref(database, `users/${user.uid}/controls`);
+    get(controlsRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+
+        if (isControls(data)) {
+          const controls: Controls = data;
+          setControls(controls);
+        }
+      }
+    });
+  }
+
+  async function loadPlaybackStateFromLocal() {
+    const data = localStorage.getItem("playback");
+    if (data !== null && isPlayback(data)) {
+      const playback: Map<number, number> = JSON.parse(data, reviver);
+      setPlaybackStates(playback);
+    }
+  }
+
+  async function loadControlsStateFromLocal() {
+    const data = localStorage.getItem("controls");
+    if (data !== null && isControls(JSON.parse(data))) {
+      const controls: Controls = JSON.parse(data);
+      setControls(controls);
+    }
+  }
+
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      if (user !== null) {
+        loadPlaybackStateFromDatabase(user);
+        loadControlsStateFromDatabase(user);
+      } else {
+        loadPlaybackStateFromLocal();
+        loadControlsStateFromLocal();
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isPlaybackStored()) {
+      const audioElement = getAudioElement();
+      if (audioElement !== undefined) {
+        audioElement.currentTime = getCurrentPlayback();
+      }
+    }
+  }, [activeEpisode]);
+
+  const [isSeeking, setIsSeeking] = useState<boolean>(false);
+
+  function isPlaybackStored(): boolean {
+    return activeEpisode !== undefined && playbackStates.has(activeEpisode.id);
+  }
+
+  function getCurrentPlayback(): number {
+    if (isPlaybackStored()) {
+      //@ts-ignore
+      const playback = playbackStates.get(activeEpisode.id);
+      if (playback !== undefined) {
+        return playback;
+      }
+    }
+
+    return 0;
+  }
+
+  function handleProgress(newTime: number) {
+    // We only want to update time slider if we are not currently seeking
+    if (!isSeeking) {
+      updatePlaybackStates(newTime);
+    }
+  }
+
+  const debouncedPlaybackStates = useDebounce(playbackStates, 10 * 1000);
+
+  useEffect(() => {
+    updatePlaybackDatabase(playbackStates, auth.currentUser);
+  }, [debouncedPlaybackStates]);
+
+  function updatePlaybackStates(newValue: number) {
+    if (activeEpisode !== undefined) {
+      if (playbackStates instanceof Map && activeEpisode !== undefined) {
+        const newPlaybackStates = new Map<number, number>(playbackStates);
+        newPlaybackStates.set(activeEpisode.id, newValue);
+        setPlaybackStates(newPlaybackStates);
+      } else {
+        const newPlaybackStates = new Map<number, number>([
+          [activeEpisode.id, newValue],
+        ]);
+        setPlaybackStates(newPlaybackStates);
+      }
+    }
+  }
+
+  function handleVolumeChange(newValue: number | number[]) {
+    if (typeof newValue === "number") {
+      const newControls = { ...controls, volume: newValue };
+      setControls(newControls);
+      updateControlsDatabase(newControls, auth.currentUser);
+    }
+  }
+
+  function handleMuteChange() {
+    const newControls = { ...controls, isMuted: !controls.isMuted };
+    setControls(newControls);
+    updateControlsDatabase(newControls, auth.currentUser);
+  }
+
+  function handleRepeatChange() {
+    const newControls = { ...controls, isRepeat: !controls.isRepeat };
+    setControls(newControls);
+    updateControlsDatabase(newControls, auth.currentUser);
+  }
+
+  function handleShuffleChange() {
+    const newControls = { ...controls, isShuffle: !controls.isShuffle };
+    setControls(newControls);
+    updateControlsDatabase(newControls, auth.currentUser);
+  }
+
+  function handleSeekChange(newValue: number | number[]) {
+    const audioElement = getAudioElement();
+    if (audioElement !== undefined && typeof newValue === "number") {
+      setIsSeeking(true);
+      audioElement.currentTime = newValue;
+      setIsSeeking(false);
+      updatePlaybackStates(newValue);
+    }
+  }
+
+  function getEpisodeIndexWithinFeed(episodeID: number) {
+    const episodeIDs = episodes.map((episode: { id: any }) => episode.id);
+    const isEpisodeID = (episode: any) => episode === episodeID;
+    const index = episodeIDs.findIndex(isEpisodeID);
+    return index;
+  }
+
+  function handleNext(episodeID: number) {
+    const index = getEpisodeIndexWithinFeed(episodeID);
+    const newIndex = index < episodes.length ? index + 1 : episodes.length - 1;
+    if (index !== newIndex) {
+      if (episodes[newIndex] !== undefined) {
+        const newEpisode = episodes[newIndex];
+        setActiveEpisode(newEpisode);
+        updateActiveEpisodeDatabase(newEpisode, auth.currentUser);
+      }
+    }
+  }
+
+  function handlePrevious(episodeID: number) {
+    const index = getEpisodeIndexWithinFeed(episodeID);
+    const newIndex = index > 0 ? index - 1 : 0;
+    if (index !== newIndex) {
+      if (episodes[newIndex] !== undefined) {
+        const newEpisode = episodes[newIndex];
+        setActiveEpisode(newEpisode);
+        updateActiveEpisodeDatabase(newEpisode, auth.currentUser);
+      }
+    }
+  }
+
+  return (
+    <div className={classes.container}>
+      <div className={classes.playback}>
+        <IconButton onClick={handleShuffleChange}>
+          <ShuffleIcon />
+        </IconButton>
+        <IconButton
+          aria-label="play previous"
+          onClick={() =>
+            activeEpisode !== undefined
+              ? handlePrevious(activeEpisode.id)
+              : null
+          }
+        >
+          <SkipPreviousIcon />
+        </IconButton>
+        <IconButton
+          color="secondary"
+          aria-label={isPlaying ? "pause" : "play"}
+          onClick={() =>
+            activeEpisode !== undefined ? setIsPlaying(!isPlaying) : null
+          }
+        >
+          {isPlaying ? (
+            <PauseCircleFilledIcon fontSize="large" />
+          ) : (
+            <PlayCircleFilledIcon fontSize="large" />
+          )}
+        </IconButton>
+        <IconButton
+          aria-label="play next"
+          onClick={() =>
+            activeEpisode !== undefined ? handleNext(activeEpisode.id) : null
+          }
+        >
+          <SkipNextIcon />
+        </IconButton>
+        <IconButton
+          aria-label={controls.isRepeat ? "repeat" : "no repeat"}
+          onClick={handleRepeatChange}
+        >
+          <RepeatIcon />
+        </IconButton>
+      </div>
+      <div className={classes.volume}>
+        <IconButton
+          aria-label={controls.isMuted ? "unmute" : "mute"}
+          onClick={handleMuteChange}
+          className={classes.muteButton}
+        >
+          {controls.isMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
+        </IconButton>
+        <Slider
+          value={controls.volume}
+          getAriaValueText={() => `volume is ${controls.volume * 100}%`}
+          aria-labelledby="volume-slider"
+          onChange={(e, newValue) => handleVolumeChange(newValue)}
+          min={0}
+          step={0.01}
+          max={1}
+        />
+      </div>
+      <div className={classes.time}>
+        <Player
+          playerRef={playerRef}
+          controls={controls}
+          src={activeEpisode?.enclosureUrl}
+          playing={isPlaying}
+          onTickedCallback={handleProgress}
+        ></Player>
+        <Typography variant="subtitle2" color="textSecondary">
+          {convertSecondsToTime(getCurrentPlayback())}
+        </Typography>
+        <Slider
+          color="primary"
+          className={classes.playbackTimer}
+          value={getCurrentPlayback()}
+          getAriaValueText={() =>
+            activeEpisode !== undefined
+              ? `current time is ${getCurrentPlayback()} seconds`
+              : ""
+          }
+          aria-labelledby="time-slider"
+          // @ts-ignore
+          onChange={(e, newValue) => handleSeekChange(newValue)}
+          min={0}
+          step={1}
+          max={activeEpisode !== undefined ? activeEpisode.duration : 0}
+        />
+        <Typography variant="subtitle2" color="textSecondary">
+          {convertSecondsToTime(
+            activeEpisode !== undefined ? activeEpisode.duration : 0,
+          )}
+        </Typography>
+      </div>
+    </div>
+  );
+}

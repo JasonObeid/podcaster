@@ -2,8 +2,7 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import Typography from "@material-ui/core/Typography";
-import InboxIcon from "@material-ui/icons/Inbox";
+import HomeIcon from "@material-ui/icons/Home";
 import SearchIcon from "@material-ui/icons/Search";
 import SettingsIcon from "@material-ui/icons/Settings";
 import SubscriptionsIcon from "@material-ui/icons/Subscriptions";
@@ -24,7 +23,18 @@ function Sidebar() {
 
   return (
     <React.Fragment>
-      <List component="nav" aria-label="search feed subscriptions settings">
+      <List component="nav" aria-label="home search subscriptions settings">
+        <ListItem
+          component={Link}
+          to="/"
+          selected={location.pathname === "/"}
+          className={classes.blackText}
+        >
+          <ListItemIcon>
+            <HomeIcon color="primary" />
+          </ListItemIcon>
+          <ListItemText primary="Home" />
+        </ListItem>
         <ListItem
           component={Link}
           to="/search"
@@ -36,17 +46,7 @@ function Sidebar() {
           </ListItemIcon>
           <ListItemText primary="Search" />
         </ListItem>
-        <ListItem
-          component={Link}
-          to="/feed"
-          selected={location.pathname === "/feed"}
-          className={classes.blackText}
-        >
-          <ListItemIcon>
-            <InboxIcon color="primary" />
-          </ListItemIcon>
-          <ListItemText primary="Feed" />
-        </ListItem>
+
         <ListItem
           component={Link}
           to="/subscriptions"

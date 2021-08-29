@@ -1,32 +1,24 @@
 import Box from "@material-ui/core/Box";
-import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
 import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
-import React, {
-  Fragment,
-  JSXElementConstructor,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { auth } from "../config/firebase";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Types } from "podcastindexjs";
 import { makeStyles } from "@material-ui/styles";
 import { Link as MuiLink } from "@material-ui/core";
-import { useHistory, useLocation, useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { getImage } from "../utils/utils";
 import { useQuery } from "react-query";
+import { updateActiveEpisodeDatabase } from "../utils/databaseMutations";
+
 const useStyles = makeStyles({
   endItems: {
     display: "flex",
@@ -34,12 +26,12 @@ const useStyles = makeStyles({
     columnGap: "24px",
   },
   rounded: {
-    borderRadius: "0.7rem",
+    borderRadius: "8px",
   },
   play: {
     display: "flex",
     flexDirection: "column",
-    rowGap: "8px",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   text: {
@@ -77,6 +69,7 @@ function getCurrentPlayback(
   return 0;
 }
 
+// @ts-ignore
 const ContextualComponent = ({ html }) => {
   const ref = useRef(null);
 
@@ -87,9 +80,11 @@ const ContextualComponent = ({ html }) => {
       .createRange()
       .createContextualFragment(html);
 
+    // @ts-ignore
     current.appendChild(documentFragment);
 
     return () => {
+      // @ts-ignore
       current.textContent = "";
     };
   }, [html]);
@@ -117,7 +112,11 @@ export default function Episode({
 }: FeedProps) {
   async function onPressButton() {
     if (data !== undefined) {
-      setActiveEpisode(episode);
+      if (episode !== undefined) {
+        setActiveEpisode(episode);
+        updateActiveEpisodeDatabase(episode, auth.currentUser);
+      }
+
       setIsPlaying(!isPlaying);
     }
   }
@@ -143,11 +142,9 @@ export default function Episode({
   const episode = data?.episode;
 
   async function getEpisodeFromId() {
-    console.log(params);
     if (episodeId !== undefined) {
       setEpisodeIdState(episodeId);
-    }
-    if (params.hasOwnProperty("episodeId")) {
+    } else if (params.hasOwnProperty("episodeId")) {
       //@ts-ignore
       setEpisodeIdState(params.episodeId);
     }
@@ -199,7 +196,7 @@ export default function Episode({
             </Grid>
             <Grid item xs={3} className={classes.endItems}>
               <Fragment>
-                <Box>
+                <Box className={classes.play}>
                   <Typography
                     variant="body2"
                     color="textSecondary"
@@ -224,7 +221,7 @@ export default function Episode({
                   >
                     {`${Math.round(episode.duration / 60)} mins`}
                   </Typography>
-                  <IconButton onClick={onPressButton}>
+                  <IconButton onClick={onPressButton} color="secondary">
                     {isPlaying && activeEpisode?.id === episode.id ? (
                       <PauseCircleFilledIcon fontSize="large" />
                     ) : (

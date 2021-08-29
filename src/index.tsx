@@ -15,10 +15,18 @@ import { QueryClient, QueryClientProvider } from "react-query";
 const theme = createTheme({
   palette: {
     primary: {
+      contrastText: blueGrey[100],
+      dark: blueGrey[900],
       main: blueGrey[700],
+      light: blueGrey[50],
     },
     secondary: {
-      main: teal[900],
+      dark: teal[900],
+      main: teal[800],
+      light: teal[100],
+    },
+    info: {
+      main: blueGrey[100],
     },
   },
 });
@@ -27,7 +35,7 @@ const queryClient = new QueryClient();
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/podcaster">
       <QueryClientProvider client={queryClient}>
         <PodcastIndexProvider>
           <ThemeProvider theme={theme}>

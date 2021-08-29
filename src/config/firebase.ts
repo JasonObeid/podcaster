@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInAnonymously,
+  signOut,
+} from "firebase/auth";
 import { getDatabase, ref, onValue, set } from "firebase/database";
 import config from "./config";
 
@@ -13,6 +19,16 @@ const auth = getAuth();
 
 const database = getDatabase();
 
-export { Providers, auth, signInWithPopup, database, ref, onValue, set };
+export {
+  Providers,
+  auth,
+  signInWithPopup,
+  signInAnonymously,
+  signOut,
+  database,
+  ref,
+  onValue,
+  set,
+};
 
 export default Firebase;

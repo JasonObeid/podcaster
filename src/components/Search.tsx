@@ -5,7 +5,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import React from "react";
 import { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { useDebounce } from "@react-hook/debounce";
 import { Types } from "podcastindexjs";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 
@@ -15,56 +15,72 @@ import Box from "@material-ui/core/Box";
 import { useQuery } from "react-query";
 
 type SearchProps = {
-  // playbackStates: Map<number, number>;
-  // activeEpisode: PIApiEpisodeInfo | undefined;
   subscriptions: Types.PIApiPodcast[];
   setSubscriptions: React.Dispatch<React.SetStateAction<Types.PIApiPodcast[]>>;
+  activeEpisode: Types.PIApiEpisodeInfo | undefined;
+  setActiveEpisode: React.Dispatch<
+    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
+  >;
+  isPlaying: boolean;
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  playbackStates: Map<number, number>;
 };
 
 const useStyles = makeStyles({
   search: { width: "75%" },
 });
 
-function Search({ subscriptions, setSubscriptions }: SearchProps) {
+function Search({
+  subscriptions,
+  setSubscriptions,
+  activeEpisode,
+  setActiveEpisode,
+  isPlaying,
+  setIsPlaying,
+  playbackStates,
+}: SearchProps) {
   const classes = useStyles();
 
   const history = useHistory();
   const params = useParams();
 
   const { client } = usePodcastIndex();
+  const [searchQueryText, setSearchQueryText] = useDebounce("", 500);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    console.log(params);
     if (params.hasOwnProperty("term")) {
       //@ts-ignore
       if (params.term !== "" && params.term !== searchText) {
         //@ts-ignore
         const initialText = params.term;
         setSearchText(initialText);
+        setSearchQueryText(initialText);
       }
     }
   }, []);
 
   const fetchedPodcast = useQuery(
-    `search/${searchText}`,
+    `search/${searchQueryText}`,
     getSearchResultsFromText,
   );
   const searchResults = fetchedPodcast?.data;
 
   async function getSearchResultsFromText() {
-    if (searchText !== "") {
-      history.push(`/search/${searchText}`);
-      const searchResults = await client.search(searchText);
+    if (searchQueryText !== "") {
+      history.push(`/search/${searchQueryText}`);
+      const searchResults = await client.search(searchQueryText);
       return searchResults.feeds;
     }
   }
 
-  //Types.PIApiFeed[]
-  async function fetchData() {}
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(event.target.value);
+    setSearchQueryText(event.target.value);
+  };
+
+  const runQuery = () => {
+    setSearchQueryText(searchText);
   };
 
   return (
@@ -89,7 +105,7 @@ function Search({ subscriptions, setSubscriptions }: SearchProps) {
           variant="contained"
           color="primary"
           startIcon={<SearchIcon />}
-          onClick={() => fetchData()}
+          onClick={runQuery}
         >
           Search
         </Button>
@@ -102,8 +118,11 @@ function Search({ subscriptions, setSubscriptions }: SearchProps) {
                 podcastId={podcast.id}
                 subscriptions={subscriptions}
                 setSubscriptions={setSubscriptions}
-                // playbackStates={playbackStates}
-                // activeEpisode={activeEpisode}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
               ></Podcast>
             </Grid>
           ))}

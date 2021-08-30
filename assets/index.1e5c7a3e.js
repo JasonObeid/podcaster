@@ -18,19 +18,33 @@ var __spreadValues = (a, b) => {
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 import { i as initializeApp, G as GoogleAuthProvider, g as getAuth, a as getDatabase, P as PodcastIndexClient_1, R as React, m as makeStyles, u as useLocation, L as List, b as ListItem, c as Link, d as ListItemIcon, e as default_1, f as ListItemText, h as default_1$1, j as default_1$2, k as default_1$3, l as useQueries, r as ref, s as set, n as useParams, C as C__Users_Jason_Documents_podcaster_node_modules_react, o as useQuery, p as Card, q as CardContent, t as Grid, T as Typography, M as MuiLink, B as Box, I as IconButton, v as default_1$4, w as default_1$5, x as LinearProgress, y as makeStyles$1, z as CardActions, A as Button, D as useHistory, E as useDebounce, F as TextField, H as default_1$6, J as default_1$7, K as signInWithPopup, N as signInAnonymously, O as signOut, Q as default_1$8, S as default_1$9, U as bundle, V as default_1$a, W as default_1$b, X as default_1$c, Y as default_1$d, Z as default_1$e, _ as default_1$f, $ as Slider, a0 as get, a1 as Switch, a2 as Route, a3 as Fade, a4 as createTheme, a5 as default_1$g, a6 as default_1$h, a7 as QueryClient, a8 as ReactDOM, a9 as BrowserRouter, aa as QueryClientProvider, ab as ThemeProvider } from "./vendor.4ce5159d.js";
-const config = {
-  firebase: {
-    apiKey: "AIzaSyCFeT-GJW_TNkH3GRkEchgBSSxd8IxWq-8",
-    authDomain: "podcaster-ca277.firebaseapp.com",
-    databaseURL: "https://podcaster-ca277-default-rtdb.firebaseio.com/",
-    projectId: "podcaster-ca277",
-    storageBucket: "podcaster-ca277.appspot.com",
-    messagingSenderId: "1060072167958",
-    appId: "1:1060072167958:web:b8071b3de130430422f337",
-    measurementId: "G-NHG3XF04JF"
+const apiKey = "AIzaSyCFeT-GJW_TNkH3GRkEchgBSSxd8IxWq-8";
+const authDomain = "podcaster-ca277.firebaseapp.com";
+const databaseURL = "https://podcaster-ca277-default-rtdb.firebaseio.com/";
+const projectId = "podcaster-ca277";
+const storageBucket = "podcaster-ca277.appspot.com";
+const messagingSenderId = "1060072167958";
+const appId = "1:1060072167958:web:b8071b3de130430422f337";
+const measurementId = "G-NHG3XF04JF";
+function getFirebaseConfig() {
+  {
+    const options = {
+      apiKey,
+      authDomain,
+      databaseURL,
+      projectId,
+      storageBucket,
+      messagingSenderId,
+      appId,
+      measurementId
+    };
+    return options;
   }
-};
-initializeApp(config.firebase);
+}
+const firebaseConfig = getFirebaseConfig();
+if (firebaseConfig === void 0)
+  throw new Error("Invalid firebase config.");
+initializeApp(firebaseConfig);
 const Providers = {
   google: new GoogleAuthProvider()
 };
@@ -227,27 +241,8 @@ function getCurrentPlayback(playbackStates, episodeID, duration) {
   }
   return 0;
 }
-const ContextualComponent = ({ html }) => {
-  const ref2 = C__Users_Jason_Documents_podcaster_node_modules_react.exports.useRef(null);
-  C__Users_Jason_Documents_podcaster_node_modules_react.exports.useEffect(() => {
-    const { current } = ref2;
-    const documentFragment = document.createRange().createContextualFragment(html);
-    current.appendChild(documentFragment);
-    return () => {
-      current.textContent = "";
-    };
-  }, [html]);
-  return /* @__PURE__ */ React.createElement("div", {
-    ref: ref2
-  });
-};
-function getDescriptionText(html) {
-  return document.createRange().createContextualFragment(html).textContent || "";
-}
 function getDescriptionHTML(html) {
-  return /* @__PURE__ */ React.createElement(ContextualComponent, {
-    html
-  });
+  return document.createRange().createContextualFragment(html);
 }
 function Episode({
   episodeId,
@@ -277,19 +272,21 @@ function Episode({
       return resp;
     }
   }
-  const { isLoading, isError, data, error } = useQuery(`episodeById/${episodeIdState}`, fetchEpisode);
+  const { data } = useQuery(`episodeById/${episodeIdState}`, fetchEpisode);
   const episode = data == null ? void 0 : data.episode;
   async function getEpisodeFromId() {
     if (episodeId !== void 0) {
       setEpisodeIdState(episodeId);
-    } else if (params.hasOwnProperty("episodeId")) {
-      setEpisodeIdState(params.episodeId);
+    } else if (params.episodeId !== void 0) {
+      const episodeId2 = parseInt(params.episodeId);
+      setEpisodeIdState(episodeId2);
     }
   }
   C__Users_Jason_Documents_podcaster_node_modules_react.exports.useEffect(() => {
     getEpisodeFromId();
   }, []);
-  if (episode !== void 0)
+  if (episode !== void 0) {
+    const episodeDescriptionNode = getDescriptionHTML(episode.description);
     return /* @__PURE__ */ React.createElement(Card, {
       component: "article"
     }, /* @__PURE__ */ React.createElement(CardContent, null, /* @__PURE__ */ React.createElement(Grid, {
@@ -304,7 +301,7 @@ function Episode({
     }, location.pathname.includes("episode") ? /* @__PURE__ */ React.createElement(C__Users_Jason_Documents_podcaster_node_modules_react.exports.Fragment, null, /* @__PURE__ */ React.createElement(Typography, {
       gutterBottom: true,
       variant: "subtitle2"
-    }, episode.title), getDescriptionHTML(episode.description)) : /* @__PURE__ */ React.createElement(C__Users_Jason_Documents_podcaster_node_modules_react.exports.Fragment, null, /* @__PURE__ */ React.createElement(MuiLink, {
+    }, episode.title), episodeDescriptionNode) : /* @__PURE__ */ React.createElement(C__Users_Jason_Documents_podcaster_node_modules_react.exports.Fragment, null, /* @__PURE__ */ React.createElement(MuiLink, {
       component: Link,
       gutterBottom: true,
       variant: "subtitle2",
@@ -314,7 +311,7 @@ function Episode({
       color: "textSecondary",
       component: "p",
       className: classes.text
-    }, getDescriptionText(episode.description)))), /* @__PURE__ */ React.createElement(Grid, {
+    }, episodeDescriptionNode.textContent || ""))), /* @__PURE__ */ React.createElement(Grid, {
       item: true,
       xs: 3,
       className: classes.endItems
@@ -346,6 +343,7 @@ function Episode({
       variant: "determinate",
       value: getCurrentPlayback(playbackStates, episode.id, episode.duration)
     }));
+  }
   return null;
 }
 function Feeds({
@@ -356,7 +354,6 @@ function Feeds({
   setIsPlaying,
   playbackStates
 }) {
-  usePodcastIndex();
   return /* @__PURE__ */ React.createElement(Grid, {
     container: true,
     spacing: 3,
@@ -435,8 +432,8 @@ function Podcast({
     if (podcastId !== void 0) {
       setPodcastIdState(podcastId);
     }
-    if (params.hasOwnProperty("podcastId")) {
-      setPodcastIdState(params.podcastId);
+    if (params.podcastId !== void 0) {
+      setPodcastIdState(parseInt(params.podcastId));
     }
   }
   C__Users_Jason_Documents_podcaster_node_modules_react.exports.useEffect(() => {
@@ -528,7 +525,7 @@ function Search({
   const [searchQueryText, setSearchQueryText] = useDebounce("", 500);
   const [searchText, setSearchText] = C__Users_Jason_Documents_podcaster_node_modules_react.exports.useState("");
   C__Users_Jason_Documents_podcaster_node_modules_react.exports.useEffect(() => {
-    if (params.hasOwnProperty("term")) {
+    if (params.term !== void 0) {
       if (params.term !== "" && params.term !== searchText) {
         const initialText = params.term;
         setSearchText(initialText);
@@ -620,38 +617,42 @@ function Subscriptions({
   }))));
 }
 var Subscriptions$1 = React.memo(Subscriptions);
-var GoogleLogo = ({ disabled }) => /* @__PURE__ */ React.createElement("div", {
-  style: {
-    marginRight: 8,
-    background: !disabled ? "#eee" : "#fff",
-    padding: 8,
-    borderRadius: 2,
-    display: "flex",
-    alignItems: "center"
-  }
-}, /* @__PURE__ */ React.createElement("svg", {
-  width: "18",
-  height: "18",
-  xmlns: "http://www.w3.org/2000/svg"
-}, /* @__PURE__ */ React.createElement("g", {
-  fill: "#000",
-  fillRule: "evenodd"
-}, /* @__PURE__ */ React.createElement("path", {
-  d: "M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z",
-  fill: "#EA4335"
-}), /* @__PURE__ */ React.createElement("path", {
-  d: "M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z",
-  fill: "#4285F4"
-}), /* @__PURE__ */ React.createElement("path", {
-  d: "M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z",
-  fill: "#FBBC05"
-}), /* @__PURE__ */ React.createElement("path", {
-  d: "M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z",
-  fill: "#34A853"
-}), /* @__PURE__ */ React.createElement("path", {
-  fill: "none",
-  d: "M0 0h18v18H0z"
-}))));
+function GoogleLogo({
+  disabled
+}) {
+  return /* @__PURE__ */ React.createElement("div", {
+    style: {
+      marginRight: 8,
+      background: !disabled ? "#eee" : "#fff",
+      padding: 8,
+      borderRadius: 2,
+      display: "flex",
+      alignItems: "center"
+    }
+  }, /* @__PURE__ */ React.createElement("svg", {
+    width: "18",
+    height: "18",
+    xmlns: "http://www.w3.org/2000/svg"
+  }, /* @__PURE__ */ React.createElement("g", {
+    fill: "#000",
+    fillRule: "evenodd"
+  }, /* @__PURE__ */ React.createElement("path", {
+    d: "M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z",
+    fill: "#EA4335"
+  }), /* @__PURE__ */ React.createElement("path", {
+    d: "M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z",
+    fill: "#4285F4"
+  }), /* @__PURE__ */ React.createElement("path", {
+    d: "M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z",
+    fill: "#FBBC05"
+  }), /* @__PURE__ */ React.createElement("path", {
+    d: "M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z",
+    fill: "#34A853"
+  }), /* @__PURE__ */ React.createElement("path", {
+    fill: "none",
+    d: "M0 0h18v18H0z"
+  }))));
+}
 const useStyles$4 = makeStyles((theme2) => ({
   googleButton: {
     color: "#fff",
@@ -681,24 +682,20 @@ function Login() {
   function signInWithSocialMedia(provider) {
     setAuthenticating(true);
     signInWithPopup(auth, provider).then((result) => {
-      result.user;
       history.push("/");
     }).catch((error) => {
-      error.code;
-      error.message;
-      error.email;
+      const errorMessage = error.message;
+      console.error(errorMessage);
     });
     setAuthenticating(false);
   }
   function continueAsGuest() {
     setAuthenticating(true);
     signInAnonymously(auth).then((result) => {
-      result.user;
       history.push("/");
     }).catch((error) => {
-      error.code;
-      error.message;
-      error.email;
+      const errorMessage = error.message;
+      console.error(errorMessage);
     });
     setAuthenticating(false);
   }
@@ -901,9 +898,12 @@ function Footer({
   const classes = useStyles$1();
   const playerRef = C__Users_Jason_Documents_podcaster_node_modules_react.exports.useRef(null);
   function getAudioElement() {
+    var _a;
     if (playerRef !== null && playerRef.current !== null) {
-      const audioElement = playerRef.current.audioEl.current;
-      return audioElement;
+      const audioElement = (_a = playerRef.current) == null ? void 0 : _a.audioEl.current;
+      if (audioElement !== null) {
+        return audioElement;
+      }
     }
   }
   C__Users_Jason_Documents_podcaster_node_modules_react.exports.useEffect(() => {
@@ -984,7 +984,7 @@ function Footer({
     return activeEpisode !== void 0 && playbackStates.has(activeEpisode.id);
   }
   function getCurrentPlayback2() {
-    if (isPlaybackStored()) {
+    if (isPlaybackStored() && activeEpisode !== void 0) {
       const playback = playbackStates.get(activeEpisode.id);
       if (playback !== void 0) {
         return playback;

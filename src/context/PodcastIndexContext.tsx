@@ -1,12 +1,11 @@
 import React from "react";
-// @ts-ignore
 import { PodcastIndexClient } from "podcastindexjs";
 
-// assumes you have an your key and secret set as environment variables
-// @ts-ignore
-const VITE_API_KEY: string = import.meta.env.VITE_API_KEY;
-// @ts-ignore
-const VITE_API_SECRET: string = import.meta.env.VITE_API_SECRET;
+const VITE_API_KEY = import.meta.env.VITE_API_KEY;
+const VITE_API_SECRET = import.meta.env.VITE_API_SECRET;
+
+if (typeof VITE_API_KEY !== "string" || typeof VITE_API_SECRET !== "string")
+  throw new Error("Error with PodcastIndex Secrets");
 
 const client = new PodcastIndexClient(VITE_API_KEY, VITE_API_SECRET);
 

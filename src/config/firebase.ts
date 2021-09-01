@@ -7,10 +7,12 @@ import {
   signOut,
 } from "firebase/auth";
 import { getDatabase, ref, onValue, set } from "firebase/database";
-import config from "./config";
+import { getFirebaseConfig } from "./config";
 
-// @ts-ignore
-const Firebase = initializeApp(config.firebase);
+const firebaseConfig = getFirebaseConfig();
+if (firebaseConfig === undefined) throw new Error("Invalid firebase config.");
+
+const Firebase = initializeApp(firebaseConfig);
 
 const Providers = {
   google: new GoogleAuthProvider(),

@@ -10,7 +10,7 @@ export default function Player({
   src,
   onTickedCallback,
 }: {
-  playerRef: React.MutableRefObject<null>;
+  playerRef: React.MutableRefObject<null | ReactAudioPlayer>;
   controls: Controls;
   src: string | undefined;
   playing: boolean;

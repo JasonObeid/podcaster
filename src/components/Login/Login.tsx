@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-//@ts-ignore
-import firebase from "firebase";
+import { useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 
 import {
@@ -11,12 +9,14 @@ import {
   signOut,
 } from "../../config/firebase";
 import { Providers } from "../../config/firebase";
-import GoogleLogo from "./GoogleLogo";
+import { GoogleLogo } from "./GoogleLogo";
 import { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import PersonIcon from "@material-ui/icons/Person";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import Grid from "@material-ui/core/Grid";
+import { GoogleAuthProvider } from "firebase/auth";
+
 const ctheme = "dark";
 const useStyles = makeStyles((theme: Theme) => ({
   googleButton: {
@@ -47,7 +47,7 @@ function Login() {
 
   const [authenticating, setAuthenticating] = useState<boolean>(false);
 
-  function signInWithSocialMedia(provider: firebase.auth.AuthProvider) {
+  function signInWithSocialMedia(provider: GoogleAuthProvider) {
     setAuthenticating(true);
     signInWithPopup(auth, provider)
       .then((result) => {
@@ -55,19 +55,20 @@ function Login() {
         // const credential = provider.credentialFromResult(result);
         // const token = credential.accessToken;
         // The signed-in user info.
-        const user = result.user;
+        //const user = result.user;
         history.push("/");
         // ...
       })
       .catch((error) => {
         // Handle Errors here.
-        const errorCode = error.code;
+        //const errorCode = error.code;
         const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.email;
-        // The AuthCredential type that was used.
-        // const credential = provider.credentialFromError(error);
-        // ...
+        // // The email of the user's account used.
+        // const email = error.email;
+        // // The AuthCredential type that was used.
+        // // const credential = provider.credentialFromError(error);
+        // // ...
+        console.error(errorMessage);
       });
     setAuthenticating(false);
   }
@@ -80,19 +81,20 @@ function Login() {
         // const credential = provider.credentialFromResult(result);
         // const token = credential.accessToken;
         // The signed-in user info.
-        const user = result.user;
+        //const user = result.user;
         history.push("/");
         // ...
       })
       .catch((error) => {
         // Handle Errors here.
-        const errorCode = error.code;
+        //const errorCode = error.code;
         const errorMessage = error.message;
         // The email of the user's account used.
-        const email = error.email;
+        //const email = error.email;
         // The AuthCredential type that was used.
         // const credential = provider.credentialFromError(error);
         // ...
+        console.error(errorMessage);
       });
     setAuthenticating(false);
   }

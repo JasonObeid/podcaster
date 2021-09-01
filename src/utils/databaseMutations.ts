@@ -20,12 +20,18 @@ export function updatePlaybackDatabase(
   newPlaybackStates: Map<number, number>,
   currentUser: User | null,
 ) {
-  if (currentUser !== null) {
-    const playbackRef = ref(database, `users/${currentUser.uid}/playback`);
+  if (newPlaybackStates.size > 0) {
+    if (currentUser !== null) {
+      const playbackRef = ref(database, `users/${currentUser.uid}/playback`);
 
-    set(playbackRef, JSON.stringify(newPlaybackStates, replacer));
+      set(playbackRef, JSON.stringify(newPlaybackStates, replacer));
+    }
+
+    localStorage.setItem(
+      "playback",
+      JSON.stringify(newPlaybackStates, replacer),
+    );
   }
-  localStorage.setItem("playback", JSON.stringify(newPlaybackStates, replacer));
 }
 
 export function updateSubscriptionsDatabase(

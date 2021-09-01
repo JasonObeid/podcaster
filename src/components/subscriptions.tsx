@@ -1,24 +1,8 @@
-import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import SearchIcon from "@material-ui/icons/Search";
 import React from "react";
-import { useEffect, useState } from "react";
-import { Types } from "podcastindexjs";
+import { SubscriptionsProps } from "../types/subscriptions";
 
 import Podcast from "./Podcast";
-
-type SubscriptionsProps = {
-  subscriptions: Types.PIApiPodcast[];
-  setSubscriptions: React.Dispatch<React.SetStateAction<Types.PIApiPodcast[]>>;
-  activeEpisode: Types.PIApiEpisodeInfo | undefined;
-  setActiveEpisode: React.Dispatch<
-    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
-  >;
-  isPlaying: boolean;
-  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  playbackStates: Map<number, number>;
-};
 
 function Subscriptions({
   subscriptions,
@@ -49,4 +33,4 @@ function Subscriptions({
   );
 }
 
-export default React.memo(Subscriptions);
+export default Subscriptions;

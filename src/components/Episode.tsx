@@ -8,8 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
 import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
 import { auth } from "../config/firebase";
-import React, { Fragment, useEffect, useRef, useState } from "react";
-import { Types } from "podcastindexjs";
+import React, { Fragment, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Link as MuiLink } from "@material-ui/core";
 import { useLocation, useParams } from "react-router";
@@ -18,6 +17,7 @@ import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { getImage } from "../utils/utils";
 import { useQuery } from "react-query";
 import { updateActiveEpisodeDatabase } from "../utils/databaseMutations";
+import { episodeParams, EpisodeProps } from "../types/episode";
 
 const useStyles = makeStyles({
   endItems: {
@@ -42,17 +42,6 @@ const useStyles = makeStyles({
   },
 });
 
-type FeedProps = {
-  episodeId: number | undefined;
-  activeEpisode: Types.PIApiEpisodeInfo | undefined;
-  setActiveEpisode: React.Dispatch<
-    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
-  >;
-  isPlaying: boolean;
-  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  playbackStates: Map<number, number>;
-};
-
 function getCurrentPlayback(
   playbackStates: Map<number, number>,
   episodeID: number,
@@ -69,47 +58,18 @@ function getCurrentPlayback(
   return 0;
 }
 
-// @ts-ignore
-const ContextualComponent = ({ html }) => {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const { current } = ref;
-
-    const documentFragment = document
-      .createRange()
-      .createContextualFragment(html);
-
-    // @ts-ignore
-    current.appendChild(documentFragment);
-
-    return () => {
-      // @ts-ignore
-      current.textContent = "";
-    };
-  }, [html]);
-
-  return <div ref={ref} />;
-};
-
-function getDescriptionText(html: string): string {
-  return (
-    document.createRange().createContextualFragment(html).textContent || ""
-  );
+function getDescriptionHTML(html: string): Node {
+  return document.createRange().createContextualFragment(html);
 }
 
-function getDescriptionHTML(html: string) {
-  return <ContextualComponent html={html}></ContextualComponent>;
-}
-
-export default function Episode({
+function Episode({
   episodeId,
   activeEpisode,
   setActiveEpisode,
   isPlaying,
   setIsPlaying,
   playbackStates,
-}: FeedProps) {
+}: EpisodeProps) {
   async function onPressButton() {
     if (data !== undefined) {
       if (episode !== undefined) {
@@ -120,10 +80,11 @@ export default function Episode({
       setIsPlaying(!isPlaying);
     }
   }
+
   const classes = useStyles();
 
   const location = useLocation();
-  const params = useParams();
+  const params: episodeParams = useParams();
 
   const { client } = usePodcastIndex();
   const [episodeIdState, setEpisodeIdState] = useState<number | null>(null);
@@ -135,18 +96,15 @@ export default function Episode({
     }
   }
 
-  const { isLoading, isError, data, error } = useQuery(
-    `episodeById/${episodeIdState}`,
-    fetchEpisode,
-  );
+  const { data } = useQuery(`episodeById/${episodeIdState}`, fetchEpisode);
   const episode = data?.episode;
 
   async function getEpisodeFromId() {
     if (episodeId !== undefined) {
       setEpisodeIdState(episodeId);
-    } else if (params.hasOwnProperty("episodeId")) {
-      //@ts-ignore
-      setEpisodeIdState(params.episodeId);
+    } else if (params.episodeId !== undefined) {
+      const episodeId = parseInt(params.episodeId);
+      setEpisodeIdState(episodeId);
     }
   }
 
@@ -154,7 +112,8 @@ export default function Episode({
     getEpisodeFromId();
   }, []);
 
-  if (episode !== undefined)
+  if (episode !== undefined) {
+    const episodeDescriptionNode = getDescriptionHTML(episode.description);
     return (
       <Card component="article">
         <CardContent>
@@ -171,7 +130,7 @@ export default function Episode({
                   <Typography gutterBottom variant="subtitle2">
                     {episode.title}
                   </Typography>
-                  {getDescriptionHTML(episode.description)}
+                  {episodeDescriptionNode}
                 </Fragment>
               ) : (
                 <Fragment>
@@ -189,7 +148,7 @@ export default function Episode({
                     component="p"
                     className={classes.text}
                   >
-                    {getDescriptionText(episode.description)}
+                    {episodeDescriptionNode.textContent || ""}
                   </Typography>
                 </Fragment>
               )}
@@ -243,5 +202,8 @@ export default function Episode({
         />
       </Card>
     );
+  }
   return null;
 }
+
+export default Episode;

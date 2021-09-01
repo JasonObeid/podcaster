@@ -29,6 +29,7 @@ import { User } from "firebase/auth";
 import Player from "./Player";
 import Typography from "@material-ui/core/Typography";
 import { useDebounce } from "@react-hook/debounce";
+import ReactAudioPlayer from "react-audio-player";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -74,15 +75,16 @@ export default function Footer({
 }: FooterProps) {
   const classes = useStyles();
 
-  const playerRef = useRef(null);
+  const playerRef = useRef<null | ReactAudioPlayer>(null);
 
   function getAudioElement() {
     if (playerRef !== null && playerRef.current !== null) {
-      const audioElement: HTMLAudioElement =
-        //@ts-ignore
-        playerRef.current.audioEl.current;
+      const audioElement: HTMLAudioElement | null =
+        playerRef.current?.audioEl.current;
 
-      return audioElement;
+      if (audioElement !== null) {
+        return audioElement;
+      }
     }
   }
 
@@ -176,8 +178,7 @@ export default function Footer({
   }
 
   function getCurrentPlayback(): number {
-    if (isPlaybackStored()) {
-      //@ts-ignore
+    if (isPlaybackStored() && activeEpisode !== undefined) {
       const playback = playbackStates.get(activeEpisode.id);
       if (playback !== undefined) {
         return playback;
@@ -252,8 +253,8 @@ export default function Footer({
   }
 
   function getEpisodeIndexWithinFeed(episodeID: number) {
-    const episodeIDs = episodes.map((episode: { id: any }) => episode.id);
-    const isEpisodeID = (episode: any) => episode === episodeID;
+    const episodeIDs = episodes.map((episode: { id: number }) => episode.id);
+    const isEpisodeID = (episode: number) => episode === episodeID;
     const index = episodeIDs.findIndex(isEpisodeID);
     return index;
   }
@@ -365,7 +366,6 @@ export default function Footer({
               : ""
           }
           aria-labelledby="time-slider"
-          // @ts-ignore
           onChange={(e, newValue) => handleSeekChange(newValue)}
           min={0}
           step={1}

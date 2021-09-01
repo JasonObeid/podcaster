@@ -32,7 +32,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     gridTemplateColumns: "minmax(208px, 256px) minmax(720px, 1fr)",
     gridTemplateRows:
       "minmax(24px, 48px) minmax(600px, 1fr) minmax(72px, 88px)",
-    // gap: "16px 16px",
     gridAutoFlow: "row",
     gridTemplateAreas:
       '"logo header header" "navigation content content" "art controls controls"',
@@ -45,17 +44,21 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     padding: "0px 24px",
   },
-  navigation: { gridArea: "navigation" },
+  navigation: {
+    gridArea: "navigation",
+    marginBottom: "8px",
+  },
   content: {
     gridArea: "content",
     overflowY: "auto",
     overflowX: "hidden",
     padding: "0px 24px",
+    marginBottom: "8px",
   },
   controls: {
     gridArea: "controls",
     padding: "0px 24px",
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.info.main,
   },
   art: {
     gridArea: "art",
@@ -63,7 +66,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.info.main,
   },
 }));
 
@@ -273,17 +276,15 @@ function App() {
         </Switch>
       </main>
       <footer className={classes.controls}>
-        {activeEpisode !== undefined ? (
-          <Footer
-            episodes={sortedEpisodes}
-            playbackStates={playbackStates}
-            activeEpisode={activeEpisode}
-            isPlaying={isPlaying}
-            setIsPlaying={setIsPlaying}
-            setPlaybackStates={setPlaybackStates}
-            setActiveEpisode={setActiveEpisode}
-          />
-        ) : null}
+        <Footer
+          episodes={sortedEpisodes}
+          playbackStates={playbackStates}
+          activeEpisode={activeEpisode}
+          isPlaying={isPlaying}
+          setIsPlaying={setIsPlaying}
+          setPlaybackStates={setPlaybackStates}
+          setActiveEpisode={setActiveEpisode}
+        />
       </footer>
       <footer className={classes.art}>
         <AlbumArt

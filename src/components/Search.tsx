@@ -6,28 +6,16 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import { useDebounce } from "@react-hook/debounce";
-import { Types } from "podcastindexjs";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 
 import { makeStyles } from "@material-ui/styles";
 import Podcast from "./Podcast";
 import Box from "@material-ui/core/Box";
 import { useQuery } from "react-query";
-
-type SearchProps = {
-  subscriptions: Types.PIApiPodcast[];
-  setSubscriptions: React.Dispatch<React.SetStateAction<Types.PIApiPodcast[]>>;
-  activeEpisode: Types.PIApiEpisodeInfo | undefined;
-  setActiveEpisode: React.Dispatch<
-    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
-  >;
-  isPlaying: boolean;
-  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  playbackStates: Map<number, number>;
-};
+import { searchParams, SearchProps } from "../types/search";
 
 const useStyles = makeStyles({
-  search: { width: "75%" },
+  search: { width: "100%", paddingRight: "32px" },
 });
 
 function Search({
@@ -42,17 +30,15 @@ function Search({
   const classes = useStyles();
 
   const history = useHistory();
-  const params = useParams();
+  const params: searchParams = useParams();
 
   const { client } = usePodcastIndex();
   const [searchQueryText, setSearchQueryText] = useDebounce("", 500);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    if (params.hasOwnProperty("term")) {
-      //@ts-ignore
+    if (params.term !== undefined) {
       if (params.term !== "" && params.term !== searchText) {
-        //@ts-ignore
         const initialText = params.term;
         setSearchText(initialText);
         setSearchQueryText(initialText);
@@ -131,4 +117,4 @@ function Search({
   );
 }
 
-export default React.memo(Search);
+export default Search;

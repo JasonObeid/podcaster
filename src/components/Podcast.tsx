@@ -7,30 +7,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import React, { Fragment } from "react";
 import { useEffect, useState } from "react";
-import { Types } from "podcastindexjs";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { useLocation, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { getImage } from "../utils/utils";
 import Feeds from "./Feeds";
 import { useQuery } from "react-query";
-import { auth, database, ref, set } from "../config/firebase";
-import {
-  updatePlaybackDatabase,
-  updateSubscriptionsDatabase,
-} from "../utils/databaseMutations";
-type PodcastProps = {
-  podcastId: number | undefined;
-  subscriptions: Types.PIApiPodcast[];
-  setSubscriptions: React.Dispatch<React.SetStateAction<Types.PIApiPodcast[]>>;
-  activeEpisode: Types.PIApiEpisodeInfo | undefined;
-  setActiveEpisode: React.Dispatch<
-    React.SetStateAction<Types.PIApiEpisodeInfo | undefined>
-  >;
-  isPlaying: boolean;
-  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  playbackStates: Map<number, number>;
-};
+import { auth } from "../config/firebase";
+import { updateSubscriptionsDatabase } from "../utils/databaseMutations";
+import { podcastParams, PodcastProps } from "../types/podcast";
 
 const useStyles = makeStyles({
   container: {
@@ -69,7 +54,7 @@ function Podcast({
 
   const { client } = usePodcastIndex();
 
-  const params = useParams();
+  const params: podcastParams = useParams();
   const location = useLocation();
 
   const [podcastIdState, setPodcastIdState] = useState<number | undefined>(
@@ -91,7 +76,6 @@ function Podcast({
 
   async function getPodcastFromId() {
     if (podcastIdState !== undefined) {
-      //@ts-ignore
       const podcast = await client.podcastById(podcastIdState);
       setFeedId(podcast.feed.id);
       return podcast.feed;
@@ -109,9 +93,8 @@ function Podcast({
     if (podcastId !== undefined) {
       setPodcastIdState(podcastId);
     }
-    if (params.hasOwnProperty("podcastId")) {
-      //@ts-ignore
-      setPodcastIdState(params.podcastId);
+    if (params.podcastId !== undefined) {
+      setPodcastIdState(parseInt(params.podcastId));
     }
   }
 
@@ -214,4 +197,4 @@ function Podcast({
     </Fragment>
   );
 }
-export default React.memo(Podcast);
+export default Podcast;

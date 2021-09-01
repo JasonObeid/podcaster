@@ -10,6 +10,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   rounded: {
     borderRadius: "8px",
   },
+  emptyIcon: {
+    backgroundColor: theme.palette.primary.light,
+    borderRadius: "8px",
+  },
   title: {
     display: "-webkit-box",
     "-webkit-line-clamp": "3",
@@ -43,7 +47,7 @@ export default function AlbumArt({
           className={classes.rounded}
         ></img>
       ) : (
-        <img height="56px" width="56px" className={classes.rounded}></img>
+        <img height="56px" width="56px" className={classes.emptyIcon}></img>
       )}
       <Box paddingLeft="16px">
         <Typography

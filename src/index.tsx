@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 const theme = createTheme({
   palette: {
     primary: {
-      contrastText: blueGrey[100],
+      contrastText: blueGrey[50],
       dark: blueGrey[900],
       main: blueGrey[700],
       light: blueGrey[50],

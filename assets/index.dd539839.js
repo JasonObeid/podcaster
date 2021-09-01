@@ -17,7 +17,7 @@ var __spreadValues = (a, b) => {
   return a;
 };
 var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-import { i as initializeApp, G as GoogleAuthProvider, g as getAuth, a as getDatabase, P as PodcastIndexClient_1, R as React, m as makeStyles, u as useLocation, L as List, b as ListItem, c as Link, d as ListItemIcon, e as default_1, f as ListItemText, h as default_1$1, j as default_1$2, k as default_1$3, l as useQueries, r as ref, s as set, n as useParams, C as C__Users_Jason_Documents_podcaster_node_modules_react, o as useQuery, p as Card, q as CardContent, t as Grid, T as Typography, M as MuiLink, B as Box, I as IconButton, v as default_1$4, w as default_1$5, x as LinearProgress, y as makeStyles$1, z as CardActions, A as Button, D as useHistory, E as useDebounce, F as TextField, H as default_1$6, J as default_1$7, K as signInWithPopup, N as signInAnonymously, O as signOut, Q as default_1$8, S as default_1$9, U as bundle, V as default_1$a, W as default_1$b, X as default_1$c, Y as default_1$d, Z as default_1$e, _ as default_1$f, $ as Slider, a0 as get, a1 as Switch, a2 as Route, a3 as Fade, a4 as createTheme, a5 as default_1$g, a6 as default_1$h, a7 as QueryClient, a8 as ReactDOM, a9 as BrowserRouter, aa as QueryClientProvider, ab as ThemeProvider } from "./vendor.4ce5159d.js";
+import { i as initializeApp, G as GoogleAuthProvider, g as getAuth, a as getDatabase, P as PodcastIndexClient_1, R as React, m as makeStyles, u as useLocation, L as List, b as ListItem, c as Link, d as ListItemIcon, e as default_1, f as ListItemText, h as default_1$1, j as default_1$2, k as default_1$3, l as useQueries, r as ref, s as set, n as useParams, C as C__Users_Jason_Documents_podcaster_node_modules_react, o as useQuery, p as Card, q as CardContent, t as Grid, T as Typography, M as MuiLink, B as Box, I as IconButton, v as default_1$4, w as default_1$5, x as LinearProgress, y as makeStyles$1, z as CardActions, A as Button, D as useHistory, E as useDebounce, F as TextField, H as default_1$6, J as default_1$7, K as signInWithPopup, N as signInAnonymously, O as signOut, Q as default_1$8, S as default_1$9, U as PropTypes, V as default_1$a, W as default_1$b, X as default_1$c, Y as default_1$d, Z as default_1$e, _ as default_1$f, $ as Slider, a0 as get, a1 as Switch, a2 as Route, a3 as Fade, a4 as createTheme, a5 as default_1$g, a6 as default_1$h, a7 as QueryClient, a8 as ReactDOM, a9 as BrowserRouter, aa as QueryClientProvider, ab as ThemeProvider } from "./vendor.f50e0a2d.js";
 const apiKey = "AIzaSyCFeT-GJW_TNkH3GRkEchgBSSxd8IxWq-8";
 const authDomain = "podcaster-ca277.firebaseapp.com";
 const databaseURL = "https://podcaster-ca277-default-rtdb.firebaseio.com/";
@@ -118,7 +118,6 @@ function Sidebar() {
     primary: "Settings"
   }))));
 }
-var Sidebar$1 = React.memo(Sidebar);
 function useQueriesTyped(queries) {
   return useQueries(queries);
 }
@@ -192,11 +191,13 @@ function updateControlsDatabase(newControls, currentUser) {
   localStorage.setItem("controls", JSON.stringify(newControls));
 }
 function updatePlaybackDatabase(newPlaybackStates, currentUser) {
-  if (currentUser !== null) {
-    const playbackRef = ref(database, `users/${currentUser.uid}/playback`);
-    set(playbackRef, JSON.stringify(newPlaybackStates, replacer));
+  if (newPlaybackStates.size > 0) {
+    if (currentUser !== null) {
+      const playbackRef = ref(database, `users/${currentUser.uid}/playback`);
+      set(playbackRef, JSON.stringify(newPlaybackStates, replacer));
+    }
+    localStorage.setItem("playback", JSON.stringify(newPlaybackStates, replacer));
   }
-  localStorage.setItem("playback", JSON.stringify(newPlaybackStates, replacer));
 }
 function updateSubscriptionsDatabase(newSubscriptions, currentUser) {
   if (currentUser !== null) {
@@ -372,7 +373,6 @@ function Feeds({
     setActiveEpisode
   }))));
 }
-var Feeds$1 = React.memo(Feeds);
 const useStyles$6 = makeStyles$1({
   container: {
     display: "grid",
@@ -496,7 +496,7 @@ function Podcast({
   }, isSubscribed() ? "Unsubscribe" : "Subscribe"))) : null, feed !== void 0 && location.pathname.includes("podcast") ? /* @__PURE__ */ React.createElement(C__Users_Jason_Documents_podcaster_node_modules_react.exports.Fragment, null, /* @__PURE__ */ React.createElement(Typography, {
     variant: "h6",
     component: "h6"
-  }, "Episodes"), /* @__PURE__ */ React.createElement(Feeds$1, {
+  }, "Episodes"), /* @__PURE__ */ React.createElement(Feeds, {
     episodes: feed,
     playbackStates,
     activeEpisode,
@@ -505,9 +505,8 @@ function Podcast({
     setIsPlaying
   })) : null);
 }
-var Podcast$1 = React.memo(Podcast);
 const useStyles$5 = makeStyles({
-  search: { width: "75%" }
+  search: { width: "100%", paddingRight: "32px" }
 });
 function Search({
   subscriptions,
@@ -576,7 +575,7 @@ function Search({
     item: true,
     key: podcast.id,
     component: "article"
-  }, /* @__PURE__ */ React.createElement(Podcast$1, {
+  }, /* @__PURE__ */ React.createElement(Podcast, {
     podcastId: podcast.id,
     subscriptions,
     setSubscriptions,
@@ -587,7 +586,6 @@ function Search({
     setIsPlaying
   })))));
 }
-var Search$1 = React.memo(Search);
 function Subscriptions({
   subscriptions,
   setSubscriptions,
@@ -597,29 +595,30 @@ function Subscriptions({
   setIsPlaying,
   playbackStates
 }) {
-  return /* @__PURE__ */ React.createElement(Grid, {
-    container: true,
-    spacing: 3,
-    direction: "column",
-    alignItems: "stretch"
-  }, subscriptions.map((podcast) => /* @__PURE__ */ React.createElement(Grid, {
-    item: true,
-    key: podcast.id
-  }, /* @__PURE__ */ React.createElement(Podcast$1, {
-    podcastId: podcast.id,
-    subscriptions,
-    setSubscriptions,
-    playbackStates,
-    activeEpisode,
-    setActiveEpisode,
-    isPlaying,
-    setIsPlaying
-  }))));
+  if (subscriptions.length > 0) {
+    return /* @__PURE__ */ React.createElement(Grid, {
+      container: true,
+      spacing: 3,
+      direction: "column",
+      alignItems: "stretch"
+    }, subscriptions.map((podcast) => /* @__PURE__ */ React.createElement(Grid, {
+      item: true,
+      key: podcast.id
+    }, /* @__PURE__ */ React.createElement(Podcast, {
+      podcastId: podcast.id,
+      subscriptions,
+      setSubscriptions,
+      playbackStates,
+      activeEpisode,
+      setActiveEpisode,
+      isPlaying,
+      setIsPlaying
+    }))));
+  } else {
+    return /* @__PURE__ */ React.createElement(Typography, null, "No Active Subscriptions");
+  }
 }
-var Subscriptions$1 = React.memo(Subscriptions);
-function GoogleLogo({
-  disabled
-}) {
+function GoogleLogo({ disabled }) {
   return /* @__PURE__ */ React.createElement("div", {
     style: {
       marginRight: 8,
@@ -758,6 +757,10 @@ const useStyles$3 = makeStyles((theme2) => ({
   rounded: {
     borderRadius: "8px"
   },
+  emptyIcon: {
+    backgroundColor: theme2.palette.primary.light,
+    borderRadius: "8px"
+  },
   title: {
     display: "-webkit-box",
     "-webkit-line-clamp": "3",
@@ -784,7 +787,7 @@ function AlbumArt({
   }) : /* @__PURE__ */ React.createElement("img", {
     height: "56px",
     width: "56px",
-    className: classes.rounded
+    className: classes.emptyIcon
   }), /* @__PURE__ */ React.createElement(Box, {
     paddingLeft: "16px"
   }, /* @__PURE__ */ React.createElement(Typography, {
@@ -836,6 +839,199 @@ function Logo() {
     alt: "cat"
   }));
 }
+class ReactAudioPlayer extends C__Users_Jason_Documents_podcaster_node_modules_react.exports.Component {
+  constructor() {
+    super(...arguments);
+    this.audioEl = React.createRef();
+    this.onError = (e) => {
+      var _a, _b;
+      return (_b = (_a = this.props).onError) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onCanPlay = (e) => {
+      var _a, _b;
+      return (_b = (_a = this.props).onCanPlay) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onCanPlayThrough = (e) => {
+      var _a, _b;
+      return (_b = (_a = this.props).onCanPlayThrough) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onPlay = (e) => {
+      var _a, _b;
+      this.setListenTrack();
+      (_b = (_a = this.props).onPlay) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onAbort = (e) => {
+      var _a, _b;
+      this.clearListenTrack();
+      (_b = (_a = this.props).onAbort) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onEnded = (e) => {
+      var _a, _b;
+      this.clearListenTrack();
+      (_b = (_a = this.props).onEnded) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onPause = (e) => {
+      var _a, _b;
+      this.clearListenTrack();
+      (_b = (_a = this.props).onPause) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onSeeked = (e) => {
+      var _a, _b;
+      (_b = (_a = this.props).onSeeked) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onLoadedMetadata = (e) => {
+      var _a, _b;
+      (_b = (_a = this.props).onLoadedMetadata) == null ? void 0 : _b.call(_a, e);
+    };
+    this.onVolumeChanged = (e) => {
+      var _a, _b;
+      (_b = (_a = this.props).onVolumeChanged) == null ? void 0 : _b.call(_a, e);
+    };
+  }
+  componentDidMount() {
+    const audio = this.audioEl.current;
+    if (!audio)
+      return;
+    this.updateVolume(this.props.volume);
+    audio.addEventListener("error", this.onError);
+    audio.addEventListener("canplay", this.onCanPlay);
+    audio.addEventListener("canplaythrough", this.onCanPlayThrough);
+    audio.addEventListener("play", this.onPlay);
+    audio.addEventListener("abort", this.onAbort);
+    audio.addEventListener("ended", this.onEnded);
+    audio.addEventListener("pause", this.onPause);
+    audio.addEventListener("seeked", this.onSeeked);
+    audio.addEventListener("loadedmetadata", this.onLoadedMetadata);
+    audio.addEventListener("volumechange", this.onVolumeChanged);
+  }
+  componentWillUnmount() {
+    const audio = this.audioEl.current;
+    if (!audio)
+      return;
+    audio.removeEventListener("error", this.onError);
+    audio.removeEventListener("canplay", this.onCanPlay);
+    audio.removeEventListener("canplaythrough", this.onCanPlayThrough);
+    audio.removeEventListener("play", this.onPlay);
+    audio.removeEventListener("abort", this.onAbort);
+    audio.removeEventListener("ended", this.onEnded);
+    audio.removeEventListener("pause", this.onPause);
+    audio.removeEventListener("seeked", this.onSeeked);
+    audio.removeEventListener("loadedmetadata", this.onLoadedMetadata);
+    audio.removeEventListener("volumechange", this.onVolumeChanged);
+  }
+  componentDidUpdate(prevProps) {
+    this.updateVolume(this.props.volume);
+  }
+  setListenTrack() {
+    if (!this.listenTracker) {
+      const listenInterval = this.props.listenInterval;
+      this.listenTracker = window.setInterval(() => {
+        var _a, _b;
+        this.audioEl.current && ((_b = (_a = this.props).onListen) == null ? void 0 : _b.call(_a, this.audioEl.current.currentTime));
+      }, listenInterval);
+    }
+  }
+  updateVolume(volume) {
+    const audio = this.audioEl.current;
+    if (audio !== null && typeof volume === "number" && volume !== (audio == null ? void 0 : audio.volume)) {
+      audio.volume = volume;
+    }
+  }
+  clearListenTrack() {
+    if (this.listenTracker) {
+      clearInterval(this.listenTracker);
+      delete this.listenTracker;
+    }
+  }
+  render() {
+    const incompatibilityMessage = this.props.children || /* @__PURE__ */ React.createElement("p", null, "Your browser does not support the ", /* @__PURE__ */ React.createElement("code", null, "audio"), " element.");
+    const controls = !(this.props.controls === false);
+    const title = this.props.title ? this.props.title : this.props.src;
+    const conditionalProps = {};
+    if (this.props.controlsList) {
+      conditionalProps.controlsList = this.props.controlsList;
+    }
+    return /* @__PURE__ */ React.createElement("audio", __spreadValues({
+      autoPlay: this.props.autoPlay,
+      className: `react-audio-player ${this.props.className}`,
+      controls,
+      crossOrigin: this.props.crossOrigin,
+      id: this.props.id,
+      loop: this.props.loop,
+      muted: this.props.muted,
+      preload: this.props.preload,
+      ref: this.audioEl,
+      src: this.props.src,
+      style: this.props.style,
+      title
+    }, conditionalProps), incompatibilityMessage);
+  }
+}
+ReactAudioPlayer.defaultProps = {
+  autoPlay: false,
+  children: null,
+  className: "",
+  controls: false,
+  controlsList: "",
+  id: "",
+  listenInterval: 1e4,
+  loop: false,
+  muted: false,
+  onAbort: () => {
+  },
+  onCanPlay: () => {
+  },
+  onCanPlayThrough: () => {
+  },
+  onEnded: () => {
+  },
+  onError: () => {
+  },
+  onListen: () => {
+  },
+  onPause: () => {
+  },
+  onPlay: () => {
+  },
+  onSeeked: () => {
+  },
+  onVolumeChanged: () => {
+  },
+  onLoadedMetadata: () => {
+  },
+  preload: "metadata",
+  style: {},
+  title: "",
+  volume: 1
+};
+ReactAudioPlayer.propTypes = {
+  autoPlay: PropTypes.bool,
+  children: PropTypes.element,
+  className: PropTypes.string,
+  controls: PropTypes.bool,
+  controlsList: PropTypes.string,
+  crossOrigin: PropTypes.string,
+  id: PropTypes.string,
+  listenInterval: PropTypes.number,
+  loop: PropTypes.bool,
+  muted: PropTypes.bool,
+  onAbort: PropTypes.func,
+  onCanPlay: PropTypes.func,
+  onCanPlayThrough: PropTypes.func,
+  onEnded: PropTypes.func,
+  onError: PropTypes.func,
+  onListen: PropTypes.func,
+  onLoadedMetadata: PropTypes.func,
+  onPause: PropTypes.func,
+  onPlay: PropTypes.func,
+  onSeeked: PropTypes.func,
+  onVolumeChanged: PropTypes.func,
+  preload: PropTypes.oneOf(["", "none", "metadata", "auto"]),
+  src: PropTypes.string,
+  style: PropTypes.objectOf(PropTypes.string),
+  title: PropTypes.string,
+  volume: PropTypes.number
+};
 const LISTEN_INTERVAL = 1e3;
 function Player({
   playerRef,
@@ -843,7 +1039,7 @@ function Player({
   src,
   onTickedCallback
 }) {
-  return /* @__PURE__ */ React.createElement(bundle, {
+  return /* @__PURE__ */ React.createElement(ReactAudioPlayer, {
     ref: playerRef,
     autoPlay: false,
     muted: controls.isMuted,
@@ -1154,17 +1350,21 @@ const useStyles = makeStyles((theme2) => ({
     alignItems: "center",
     padding: "0px 24px"
   },
-  navigation: { gridArea: "navigation" },
+  navigation: {
+    gridArea: "navigation",
+    marginBottom: "8px"
+  },
   content: {
     gridArea: "content",
     overflowY: "auto",
     overflowX: "hidden",
-    padding: "0px 24px"
+    padding: "0px 24px",
+    marginBottom: "8px"
   },
   controls: {
     gridArea: "controls",
     padding: "0px 24px",
-    backgroundColor: theme2.palette.primary.contrastText
+    backgroundColor: theme2.palette.info.main
   },
   art: {
     gridArea: "art",
@@ -1172,7 +1372,7 @@ const useStyles = makeStyles((theme2) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: theme2.palette.primary.contrastText
+    backgroundColor: theme2.palette.info.main
   }
 }));
 function App() {
@@ -1271,14 +1471,14 @@ function App() {
     className: classes.header
   }, /* @__PURE__ */ React.createElement(Header, null)), /* @__PURE__ */ React.createElement("nav", {
     className: classes.navigation
-  }, /* @__PURE__ */ React.createElement(Sidebar$1, null)), /* @__PURE__ */ React.createElement("main", {
+  }, /* @__PURE__ */ React.createElement(Sidebar, null)), /* @__PURE__ */ React.createElement("main", {
     className: classes.content
   }, /* @__PURE__ */ React.createElement(Switch, {
     location
   }, /* @__PURE__ */ React.createElement(Route, {
     exact: true,
     path: "/"
-  }, /* @__PURE__ */ React.createElement(Fade, null, /* @__PURE__ */ React.createElement(Feeds$1, {
+  }, /* @__PURE__ */ React.createElement(Fade, null, /* @__PURE__ */ React.createElement(Feeds, {
     episodes: sortedEpisodes,
     playbackStates,
     activeEpisode,
@@ -1287,7 +1487,7 @@ function App() {
     setIsPlaying
   }))), /* @__PURE__ */ React.createElement(Route, {
     path: "/search/:term"
-  }, /* @__PURE__ */ React.createElement(Search$1, {
+  }, /* @__PURE__ */ React.createElement(Search, {
     subscriptions,
     setSubscriptions,
     playbackStates,
@@ -1297,7 +1497,7 @@ function App() {
     setIsPlaying
   })), /* @__PURE__ */ React.createElement(Route, {
     path: "/search/:term"
-  }, /* @__PURE__ */ React.createElement(Search$1, {
+  }, /* @__PURE__ */ React.createElement(Search, {
     subscriptions,
     setSubscriptions,
     playbackStates,
@@ -1307,7 +1507,7 @@ function App() {
     setIsPlaying
   })), /* @__PURE__ */ React.createElement(Route, {
     path: "/search"
-  }, /* @__PURE__ */ React.createElement(Search$1, {
+  }, /* @__PURE__ */ React.createElement(Search, {
     subscriptions,
     setSubscriptions,
     playbackStates,
@@ -1328,7 +1528,7 @@ function App() {
   })), /* @__PURE__ */ React.createElement(Route, {
     exact: true,
     path: "/subscriptions"
-  }, /* @__PURE__ */ React.createElement(Subscriptions$1, {
+  }, /* @__PURE__ */ React.createElement(Subscriptions, {
     subscriptions,
     setSubscriptions,
     playbackStates,
@@ -1342,7 +1542,7 @@ function App() {
   }, /* @__PURE__ */ React.createElement(Login, null)), /* @__PURE__ */ React.createElement(Route, {
     exact: true,
     path: "/podcast/:podcastId"
-  }, /* @__PURE__ */ React.createElement(Podcast$1, {
+  }, /* @__PURE__ */ React.createElement(Podcast, {
     podcastId: void 0,
     subscriptions,
     setSubscriptions,
@@ -1353,7 +1553,7 @@ function App() {
     setIsPlaying
   })))), /* @__PURE__ */ React.createElement("footer", {
     className: classes.controls
-  }, activeEpisode !== void 0 ? /* @__PURE__ */ React.createElement(Footer, {
+  }, /* @__PURE__ */ React.createElement(Footer, {
     episodes: sortedEpisodes,
     playbackStates,
     activeEpisode,
@@ -1361,7 +1561,7 @@ function App() {
     setIsPlaying,
     setPlaybackStates,
     setActiveEpisode
-  }) : null), /* @__PURE__ */ React.createElement("footer", {
+  })), /* @__PURE__ */ React.createElement("footer", {
     className: classes.art
   }, /* @__PURE__ */ React.createElement(AlbumArt, {
     activeEpisode,
@@ -1376,7 +1576,7 @@ var index = 'body {\n  margin: 0;\n  font-family: -apple-system, BlinkMacSystemF
 const theme = createTheme({
   palette: {
     primary: {
-      contrastText: default_1$g[100],
+      contrastText: default_1$g[50],
       dark: default_1$g[900],
       main: default_1$g[700],
       light: default_1$g[50]

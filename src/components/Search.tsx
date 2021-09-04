@@ -15,7 +15,7 @@ import { useQuery } from "react-query";
 import { searchParams, SearchProps } from "../types/search";
 
 const useStyles = makeStyles({
-  search: { width: "100%", paddingRight: "32px" },
+  search: { paddingRight: "32px" },
 });
 
 function Search({
@@ -82,6 +82,8 @@ function Search({
           id="standard-search"
           label="Search"
           type="search"
+          variant="filled"
+          fullWidth
           value={searchText}
           onChange={handleChange}
           className={classes.search}
@@ -96,7 +98,13 @@ function Search({
           Search
         </Button>
       </Box>
-      <Grid container spacing={3} direction="column" alignItems="stretch">
+      <Grid
+        container
+        spacing={3}
+        direction="column"
+        alignItems="stretch"
+        component={"article"}
+      >
         {searchResults !== undefined &&
           searchResults.map((podcast) => (
             <Grid item key={podcast.id} component="article">

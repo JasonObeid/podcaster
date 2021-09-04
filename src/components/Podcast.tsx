@@ -16,6 +16,7 @@ import { useQuery } from "react-query";
 import { auth } from "../config/firebase";
 import { updateSubscriptionsDatabase } from "../utils/databaseMutations";
 import { podcastParams, PodcastProps } from "../types/podcast";
+import { Image, Transformation } from "cloudinary-react";
 
 const useStyles = makeStyles({
   container: {
@@ -37,6 +38,12 @@ const useStyles = makeStyles({
   },
   rounded: {
     borderRadius: "8px",
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    padding: 16,
+    paddingBottom: 0,
   },
 });
 
@@ -136,39 +143,45 @@ function Podcast({
     <Fragment>
       {podcast !== undefined ? (
         <Card
-          component="article"
           className={
             location.pathname.includes("podcast") ? classes.podcast : ""
           }
         >
+          <div className={classes.header}>
+            {location.pathname.includes("podcast") ? (
+              <Typography variant="h5" component="h5">
+                {podcast.title}
+              </Typography>
+            ) : (
+              <MuiLink
+                component={Link}
+                variant="h5"
+                to={`/podcast/${podcast.id}`}
+              >
+                {podcast.title}
+              </MuiLink>
+            )}
+          </div>
           <CardContent className={classes.container}>
             <Fragment>
               <div className={classes.content}>
-                {location.pathname.includes("podcast") ? (
-                  <Typography variant="h5" component="h5" gutterBottom>
-                    {podcast.title}
-                  </Typography>
-                ) : (
-                  <MuiLink
-                    component={Link}
-                    gutterBottom
-                    variant="h5"
-                    to={`/podcast/${podcast.id}`}
-                  >
-                    {podcast.title}
-                  </MuiLink>
-                )}
                 <Typography variant="body2" color="textSecondary" component="p">
                   {podcast.description}
                 </Typography>
               </div>
               <div className={classes.icon}>
-                <img
+                <Image
+                  publicId={getImage(podcast.artwork, podcast.image)}
+                  type="fetch"
                   className={classes.rounded}
-                  src={getImage(podcast.artwork, podcast.image)}
-                  height="80px"
-                  width="auto"
-                ></img>
+                >
+                  <Transformation
+                    width="auto"
+                    height={80}
+                    crop="fill"
+                    alt={podcast.title}
+                  />
+                </Image>
               </div>
             </Fragment>
           </CardContent>

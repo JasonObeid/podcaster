@@ -993,6 +993,25 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@cloudinary/html@1.0.0-beta.2":
+  version "1.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@cloudinary/html/-/html-1.0.0-beta.2.tgz#3523aca7aa263cbc1f6459918c062d34a9700bd0"
+  integrity sha512-Leie6RQmiwC/Krz80p1eLfOv16BhtICSi1MFbMIC0JjigM0bQr8ZwxDEx1E7KIqedcC6+gTd1P6n+rlFxy1fWg==
+  dependencies:
+    "@types/lodash.clonedeep" "^4.5.6"
+    "@types/lodash.debounce" "^4.0.6"
+    "@types/node" "^14.14.10"
+    lodash.clonedeep "^4.5.0"
+    lodash.debounce "^4.0.8"
+    typescript "^4.1.2"
+
+"@cloudinary/react@^1.0.0-beta.8":
+  version "1.0.0-beta.8"
+  resolved "https://registry.yarnpkg.com/@cloudinary/react/-/react-1.0.0-beta.8.tgz#a136a39ac4389c44f78c9393653b037d8bc7bd3e"
+  integrity sha512-zxK8J6fOijKvb0UzGp7k6/9+Y1WBw4xrARoVgMEwUnk6kDgCTFxbJWiMg6a6/pwfYn/Ma6hc2XVq/tOZtuAi2g==
+  dependencies:
+    "@cloudinary/html" "1.0.0-beta.2"
+
 "@emotion/hash@^0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
@@ -1907,6 +1926,25 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.9.tgz#97edc9037ea0c38585320b28964dde3b39e4660d"
   integrity sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==
 
+"@types/lodash.clonedeep@^4.5.6":
+  version "4.5.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.clonedeep/-/lodash.clonedeep-4.5.6.tgz#3b6c40a0affe0799a2ce823b440a6cf33571d32b"
+  integrity sha512-cE1jYr2dEg1wBImvXlNtp0xDoS79rfEdGozQVgliDZj1uERH4k+rmEMTudP9b4VQ8O6nRb5gPqft0QzEQGMQgA==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash.debounce@^4.0.6":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@types/lodash.debounce/-/lodash.debounce-4.0.6.tgz#c5a2326cd3efc46566c47e4c0aa248dc0ee57d60"
+  integrity sha512-4WTmnnhCfDvvuLMaF3KV4Qfki93KebocUF45msxhYyjMttZDQYzHkO639ohhk8+oco2cluAFL3t5+Jn4mleylQ==
+  dependencies:
+    "@types/lodash" "*"
+
+"@types/lodash@*":
+  version "4.14.172"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.172.tgz#aad774c28e7bfd7a67de25408e03ee5a8c3d028a"
+  integrity sha512-/BHF5HAx3em7/KkzVKm3LrsD6HZAXuXO1AJZQ3cRRBZj4oHZDviWPYu0aEplAqDFNHZPW6d3G7KN+ONcCCC7pw==
+
 "@types/long@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.1.tgz#459c65fa1867dafe6a8f322c4c51695663cc55e9"
@@ -1929,6 +1967,11 @@
   version "16.7.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.1.tgz#c6b9198178da504dfca1fd0be9b2e1002f1586f0"
   integrity sha512-ncRdc45SoYJ2H4eWU9ReDfp3vtFqDYhjOsKlFFUDEn8V1Bgr2RjYal8YT5byfadWIRluhPFU6JiDOl0H6Sl87A==
+
+"@types/node@^14.14.10":
+  version "14.17.14"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.14.tgz#6fda9785b41570eb628bac27be4b602769a3f938"
+  integrity sha512-rsAj2u8Xkqfc332iXV12SqIsjVi07H479bOP4q94NAcjzmAvapumEhuVIt53koEf7JFrpjgNKjBga5Pnn/GL8A==
 
 "@types/prettier@^2.1.5":
   version "2.3.2"
@@ -2551,6 +2594,19 @@ cliui@^7.0.2:
     string-width "^4.2.0"
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
+
+cloudinary-core@^2.11.3:
+  version "2.11.4"
+  resolved "https://registry.yarnpkg.com/cloudinary-core/-/cloudinary-core-2.11.4.tgz#1d191935bcdcd412d499a91b928a94b266fee49d"
+  integrity sha512-F1BZczD6f5mB73D0c8gl/iuacVQQO+UhckNZxeeS9ZIVeIHbsfqwWiAZMQmIvEb7Wti/9MLU0xVwaWOak2THHA==
+
+cloudinary-react@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/cloudinary-react/-/cloudinary-react-1.7.0.tgz#c85f131acc97284453d94363c2219022dc6f1d63"
+  integrity sha512-Q2fQrQ+NwJ1Ei5ISHfWX7cZfC9z71OeOZYQv4MV8sDEDVCml2cvRexvbQ7ksDvqkYd3SCegn5vMDuHp5w3NlCQ==
+  dependencies:
+    cloudinary-core "^2.11.3"
+    prop-types "^15.6.2"
 
 clsx@^1.0.4, clsx@^1.1.1:
   version "1.1.1"
@@ -4919,13 +4975,6 @@ ramda@^0.27.1:
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
   integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
 
-react-audio-player@^0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/react-audio-player/-/react-audio-player-0.17.0.tgz#4be7b1952512801f36ba0865a9c98f7b108f991e"
-  integrity sha512-aCZgusPxA9HK7rLZcTdhTbBH9l6do9vn3NorgoDZRxRxJlOy9uZWzPaKjd7QdcuP2vXpxGA/61JMnnOEY7NXeA==
-  dependencies:
-    prop-types "^15.7.2"
-
 react-dom@^17.0.2:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.2.tgz#ecffb6845e3ad8dbfcdc498f0d0a939736502c23"
@@ -5629,6 +5678,11 @@ typedarray-to-buffer@^3.1.5:
   integrity sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==
   dependencies:
     is-typedarray "^1.0.0"
+
+typescript@^4.1.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.4.2.tgz#6d618640d430e3569a1dfb44f7d7e600ced3ee86"
+  integrity sha512-gzP+t5W4hdy4c+68bfcv0t400HVJMMd2+H9B7gae1nQlBzCqvrXX+6GL/b3GAgyTH966pzrZ70/fRjwAtZksSQ==
 
 typescript@^4.3.5:
   version "4.3.5"

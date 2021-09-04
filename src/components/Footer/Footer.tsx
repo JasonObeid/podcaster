@@ -29,7 +29,7 @@ import { User } from "firebase/auth";
 import Player from "./Player";
 import Typography from "@material-ui/core/Typography";
 import { useDebounce } from "@react-hook/debounce";
-import ReactAudioPlayer from "react-audio-player";
+import ReactAudioPlayer from "./ReactAudioPlayer";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -62,6 +62,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   playbackTimer: { marginInline: "24px" },
   muteButton: { marginRight: "16px" },
+  muteButtonActive: {
+    marginRight: "16px",
+    backgroundColor: theme.palette.primary.light,
+  },
+  shuffleButtonActive: { backgroundColor: theme.palette.primary.light },
+  repeatButtonActive: { backgroundColor: theme.palette.primary.light },
 }));
 
 export default function Footer({
@@ -286,7 +292,13 @@ export default function Footer({
   return (
     <div className={classes.container}>
       <div className={classes.playback}>
-        <IconButton onClick={handleShuffleChange}>
+        <IconButton
+          onClick={handleShuffleChange}
+          aria-label={controls.isShuffle ? "pause" : "play"}
+          className={
+            controls.isShuffle ? classes.shuffleButtonActive : undefined
+          }
+        >
           <ShuffleIcon />
         </IconButton>
         <IconButton
@@ -323,6 +335,7 @@ export default function Footer({
         <IconButton
           aria-label={controls.isRepeat ? "repeat" : "no repeat"}
           onClick={handleRepeatChange}
+          className={controls.isRepeat ? classes.repeatButtonActive : undefined}
         >
           <RepeatIcon />
         </IconButton>
@@ -331,7 +344,9 @@ export default function Footer({
         <IconButton
           aria-label={controls.isMuted ? "unmute" : "mute"}
           onClick={handleMuteChange}
-          className={classes.muteButton}
+          className={
+            controls.isMuted ? classes.muteButtonActive : classes.muteButton
+          }
         >
           {controls.isMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
         </IconButton>

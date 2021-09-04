@@ -4,7 +4,7 @@ import { auth, database, ref } from "./config/firebase";
 import { usePodcastIndex } from "./context/PodcastIndexContext";
 import { Types } from "podcastindexjs";
 import Sidebar from "./components/Sidebar";
-import Feeds from "./components/Feeds";
+import Home from "./components/Feeds";
 import Search from "./components/Search";
 import Subscriptions from "./components/Subscriptions";
 import { Theme } from "@material-ui/core";
@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflowY: "auto",
     overflowX: "hidden",
     padding: "0px 24px",
+    marginTop: "8px",
     marginBottom: "8px",
   },
   controls: {
@@ -76,7 +77,6 @@ function App() {
   const location = useLocation();
   const { client } = usePodcastIndex();
 
-  const [loading, setLoading] = useState<boolean>(true);
   const [subscriptions, setSubscriptions] = useState<Types.PIApiPodcast[]>([]);
   const [playbackStates, setPlaybackStates] = useState<Map<number, number>>(
     new Map<number, number>(),
@@ -166,7 +166,6 @@ function App() {
   // Monitor and Update user state.
   useEffect(() => {
     auth.onAuthStateChanged((user: User | null) => {
-      setLoading(true);
       if (user !== null) {
         console.log("User detected.");
         loadSubscriptionsStateFromDatabase(user);
@@ -175,7 +174,6 @@ function App() {
         loadSubscriptionsStateFromLocal();
         loadActiveEpisodeStateFromLocal();
       }
-      setLoading(false);
     });
   }, []);
 
@@ -194,14 +192,14 @@ function App() {
         <Switch location={location}>
           <Route exact path="/">
             <Fade>
-              <Feeds
+              <Home
                 episodes={sortedEpisodes}
                 playbackStates={playbackStates}
                 activeEpisode={activeEpisode}
                 setActiveEpisode={setActiveEpisode}
                 isPlaying={isPlaying}
                 setIsPlaying={setIsPlaying}
-              ></Feeds>
+              ></Home>
             </Fade>
           </Route>
           <Route path="/search/:term">

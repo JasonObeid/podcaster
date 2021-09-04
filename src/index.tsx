@@ -12,6 +12,8 @@ import "@fontsource/roboto/700.css";
 import { ThemeProvider, createTheme } from "@material-ui/core";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { CloudinaryContext } from "cloudinary-react";
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -33,15 +35,24 @@ const theme = createTheme({
 
 const queryClient = new QueryClient();
 
+const VITE_CLOUDINARY_NAME = import.meta.env.VITE_CLOUDINARY_NAME;
+if (typeof VITE_CLOUDINARY_NAME !== "string")
+  throw new Error("Error with Cloudinary Secrets");
+
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter basename="/podcaster">
       <QueryClientProvider client={queryClient}>
-        <PodcastIndexProvider>
-          <ThemeProvider theme={theme}>
-            <App />
-          </ThemeProvider>
-        </PodcastIndexProvider>
+        <CloudinaryContext
+          cloudName={VITE_CLOUDINARY_NAME}
+          style={{ height: "100%" }}
+        >
+          <PodcastIndexProvider>
+            <ThemeProvider theme={theme}>
+              <App />
+            </ThemeProvider>
+          </PodcastIndexProvider>
+        </CloudinaryContext>
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>,

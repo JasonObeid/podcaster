@@ -8,7 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
 import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
 import { auth } from "../config/firebase";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Link as MuiLink } from "@material-ui/core";
 import { useLocation, useParams } from "react-router";
@@ -18,20 +18,20 @@ import { getImage } from "../utils/utils";
 import { useQuery } from "react-query";
 import { updateActiveEpisodeDatabase } from "../utils/databaseMutations";
 import { episodeParams, EpisodeProps } from "../types/episode";
+import { Image, Transformation } from "cloudinary-react";
 
 const useStyles = makeStyles({
   endItems: {
     display: "flex",
     justifyContent: "flex-end",
     columnGap: "24px",
+    alignItems: "center",
   },
   rounded: {
     borderRadius: "8px",
   },
   play: {
     display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
     alignItems: "center",
   },
   text: {
@@ -39,6 +39,15 @@ const useStyles = makeStyles({
     "-webkit-line-clamp": "4",
     "-webkit-box-orient": "vertical",
     overflow: "hidden",
+  },
+  episodeLink: {
+    paddingBottom: "8px",
+  },
+  header: {
+    display: "flex",
+    alignItems: "center",
+    padding: 16,
+    paddingBottom: 0,
   },
 });
 
@@ -114,9 +123,10 @@ function Episode({
 
   if (episode !== undefined) {
     const episodeDescriptionNode = getDescriptionHTML(episode.description);
+
     return (
-      <Card component="article">
-        <CardContent>
+      <Card>
+        <div className={classes.header}>
           <Grid
             container
             spacing={1}
@@ -126,69 +136,65 @@ function Episode({
           >
             <Grid item xs={9}>
               {location.pathname.includes("episode") ? (
-                <Fragment>
-                  <Typography gutterBottom variant="subtitle2">
-                    {episode.title}
-                  </Typography>
-                  {episodeDescriptionNode}
-                </Fragment>
+                <Typography variant="subtitle2">{episode.title}</Typography>
               ) : (
-                <Fragment>
-                  <MuiLink
-                    component={Link}
-                    gutterBottom
-                    variant="subtitle2"
-                    to={`/episode/${episode.id}`}
-                  >
-                    {episode.title}
-                  </MuiLink>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    component="p"
-                    className={classes.text}
-                  >
-                    {episodeDescriptionNode.textContent || ""}
-                  </Typography>
-                </Fragment>
+                <MuiLink
+                  component={Link}
+                  variant="subtitle2"
+                  to={`/episode/${episode.id}`}
+                >
+                  {episode.title}
+                </MuiLink>
               )}
             </Grid>
             <Grid item xs={3} className={classes.endItems}>
-              <Fragment>
-                <Box className={classes.play}>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    component="p"
-                  >
-                    {new Date(
-                      episode.datePublished * 1000,
-                    ).toLocaleDateString()}
-                  </Typography>
-                  <img
-                    src={getImage(episode.image, episode.feedImage)}
-                    height="48px"
-                    width="auto"
-                    className={classes.rounded}
-                  ></img>
-                </Box>
-                <Box className={classes.play}>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    component="p"
-                  >
-                    {`${Math.round(episode.duration / 60)} mins`}
-                  </Typography>
-                  <IconButton onClick={onPressButton} color="secondary">
-                    {isPlaying && activeEpisode?.id === episode.id ? (
-                      <PauseCircleFilledIcon fontSize="large" />
-                    ) : (
-                      <PlayCircleFilledIcon fontSize="large" />
-                    )}
-                  </IconButton>
-                </Box>
-              </Fragment>
+              <Typography variant="body2" color="textSecondary" component="p">
+                {`${Math.round(episode.duration / 60)} mins`}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                {new Date(episode.datePublished * 1000).toLocaleDateString()}
+              </Typography>
+            </Grid>
+          </Grid>
+        </div>
+        <CardContent>
+          <Grid
+            container
+            spacing={1}
+            alignItems="center"
+            justifyContent="space-between"
+            wrap="nowrap"
+          >
+            <Grid item xs={9}>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                component="p"
+                className={classes.text}
+              >
+                {episodeDescriptionNode.textContent || ""}
+              </Typography>
+            </Grid>
+            <Grid item xs={3} className={classes.endItems}>
+              <Image
+                publicId={getImage(episode.image, episode.feedImage)}
+                type="fetch"
+                className={classes.rounded}
+              >
+                <Transformation
+                  width="auto"
+                  height={48}
+                  crop="fill"
+                  alt={episode.title}
+                />
+              </Image>
+              <IconButton onClick={onPressButton} color="secondary">
+                {isPlaying && activeEpisode?.id === episode.id ? (
+                  <PauseCircleFilledIcon fontSize="large" />
+                ) : (
+                  <PlayCircleFilledIcon fontSize="large" />
+                )}
+              </IconButton>
             </Grid>
           </Grid>
         </CardContent>

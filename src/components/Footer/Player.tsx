@@ -1,5 +1,5 @@
 import React from "react";
-import ReactAudioPlayer from "react-audio-player";
+import ReactAudioPlayer from "./ReactAudioPlayer";
 import { Controls } from "../../types/footer";
 
 const LISTEN_INTERVAL = 1000;
@@ -26,6 +26,6 @@ export default function Player({
       loop={controls.isRepeat}
       listenInterval={LISTEN_INTERVAL}
       onListen={onTickedCallback}
-    />
+    ></ReactAudioPlayer>
   );
 }

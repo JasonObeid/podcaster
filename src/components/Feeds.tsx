@@ -15,8 +15,8 @@ function Feeds({
   if (episodes.length > 0) {
     return (
       <Grid container spacing={3} direction="column" alignItems="stretch">
-        {episodes.map((episode) => (
-          <Grid item xs key={episode.id} component={"article"}>
+        {episodes.map((episode, index) => (
+          <Grid item xs component={"article"} key={`${index} ${episode.id}`}>
             <Episode
               episodeId={episode.id}
               playbackStates={playbackStates}

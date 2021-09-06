@@ -5,16 +5,17 @@ import { makeStyles } from "@material-ui/styles";
 import { Types } from "podcastindexjs";
 import { getEpisodeAuthor, getImage } from "../../utils/utils";
 import Box from "@material-ui/core/Box";
-import { NavLink } from "react-router-dom";
+import { Link as MuiLink } from "@material-ui/core";
+import { Link, NavLink } from "react-router-dom";
 import { Image, Transformation } from "cloudinary-react";
 
 const useStyles = makeStyles((theme: Theme) => ({
   rounded: {
-    borderRadius: "8px",
+    borderRadius: "4px",
   },
   emptyIcon: {
     backgroundColor: theme.palette.primary.light,
-    borderRadius: "8px",
+    borderRadius: "4px",
   },
   title: {
     display: "-webkit-box",
@@ -46,47 +47,48 @@ export default function AlbumArt({
   return (
     <>
       {activeEpisode !== undefined ? (
-        <Image
-          publicId={getImage(activeEpisode.image, activeEpisode.feedImage)}
-          type="fetch"
-          className={classes.rounded}
-        >
-          <Transformation
-            width="auto"
-            height={56}
-            crop="fill"
+        <NavLink to={`/episode/${activeEpisode.id}`}>
+          <Image
+            publicId={getImage(activeEpisode.image, activeEpisode.feedImage)}
+            type="fetch"
+            className={classes.rounded}
             alt={activeEpisode.title}
-          />
-        </Image>
+          >
+            <Transformation
+              width="auto"
+              height={56}
+              crop="fill"
+              quality="auto"
+            />
+          </Image>
+        </NavLink>
       ) : (
         <img height="56px" width="56px" className={classes.emptyIcon}></img>
       )}
-      <Box paddingLeft="16px">
-        {activeEpisode !== undefined ? (
-          <>
-            <Typography
-              gutterBottom
-              variant="subtitle2"
-              component={NavLink}
-              to={`/episode/${activeEpisode.id}`}
-              className={classes.title}
-            >
-              {activeEpisode.title}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="textSecondary"
-              component={NavLink}
-              to={`/podcast/${activeEpisode.feedId}`}
-              className={classes.author}
-            >
-              {activeEpisode !== undefined
-                ? getEpisodeAuthor(subscriptions, activeEpisode.feedId)
-                : ""}
-            </Typography>
-          </>
-        ) : null}
-      </Box>
+      {activeEpisode !== undefined ? (
+        <Box paddingLeft="16px">
+          <MuiLink
+            gutterBottom
+            variant="subtitle2"
+            className={classes.title}
+            component={Link}
+            to={`/episode/${activeEpisode.id}`}
+          >
+            {activeEpisode.title}
+          </MuiLink>
+          <MuiLink
+            variant="caption"
+            color="textSecondary"
+            component={Link}
+            to={`/podcast/${activeEpisode.feedId}`}
+            className={classes.author}
+          >
+            {activeEpisode !== undefined
+              ? getEpisodeAuthor(subscriptions, activeEpisode.feedId)
+              : ""}
+          </MuiLink>
+        </Box>
+      ) : null}
     </>
   );
 }

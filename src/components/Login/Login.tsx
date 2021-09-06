@@ -10,10 +10,10 @@ import {
 } from "../../config/firebase";
 import { Providers } from "../../config/firebase";
 import { GoogleLogo } from "./GoogleLogo";
-import { Theme } from "@material-ui/core";
+import { Theme, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
-import PersonIcon from "@material-ui/icons/Person";
-import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import PersonIcon from "@material-ui/icons/PersonRounded";
+import ExitToAppIcon from "@material-ui/icons/ExitToAppRounded";
 import Grid from "@material-ui/core/Grid";
 import { GoogleAuthProvider } from "firebase/auth";
 
@@ -27,10 +27,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     "&:hover": {
       backgroundColor: ctheme === "dark" ? "#1b53e2" : "#eee",
     },
+    width: "200px",
+    justifyContent: "flex-start",
   },
   defaultButton: {
     padding: "8px",
     textTransform: "none",
+    width: "200px",
+    justifyContent: "flex-start",
   },
   textStyle: {
     paddingRight: 10,
@@ -51,24 +55,10 @@ function Login() {
     setAuthenticating(true);
     signInWithPopup(auth, provider)
       .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        // const credential = provider.credentialFromResult(result);
-        // const token = credential.accessToken;
-        // The signed-in user info.
-        //const user = result.user;
         history.push("/");
-        // ...
       })
       .catch((error) => {
-        // Handle Errors here.
-        //const errorCode = error.code;
-        const errorMessage = error.message;
-        // // The email of the user's account used.
-        // const email = error.email;
-        // // The AuthCredential type that was used.
-        // // const credential = provider.credentialFromError(error);
-        // // ...
-        console.error(errorMessage);
+        // const errorMessage = error.message;
       });
     setAuthenticating(false);
   }
@@ -77,24 +67,10 @@ function Login() {
     setAuthenticating(true);
     signInAnonymously(auth)
       .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        // const credential = provider.credentialFromResult(result);
-        // const token = credential.accessToken;
-        // The signed-in user info.
-        //const user = result.user;
         history.push("/");
-        // ...
       })
       .catch((error) => {
-        // Handle Errors here.
-        //const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        //const email = error.email;
-        // The AuthCredential type that was used.
-        // const credential = provider.credentialFromError(error);
-        // ...
-        console.error(errorMessage);
+        // const errorMessage = error.message;
       });
     setAuthenticating(false);
   }
@@ -105,13 +81,19 @@ function Login() {
 
   return (
     <>
-      <h1>Welcome to Podcaster</h1>
+      <Typography variant="h3" style={{ paddingBottom: "24px" }}>
+        Welcome to Podcaster
+      </Typography>
       {auth.currentUser === null ? (
-        <p>Please sign in to sync your data to your account.</p>
+        <Typography style={{ paddingBottom: "16px" }}>
+          Please sign in to sync your data to your account.
+        </Typography>
       ) : (
-        <p>Your data is being synced to your account.</p>
+        <Typography style={{ paddingBottom: "16px" }}>
+          Your data is being synced to your account.
+        </Typography>
       )}
-      <Grid container direction="column" spacing={2} alignItems="stretch">
+      <Grid container direction="column" spacing={1} alignItems="stretch">
         {auth.currentUser === null ? (
           <>
             <Grid item>
@@ -136,7 +118,6 @@ function Login() {
                 startIcon={
                   <div
                     style={{
-                      marginRight: 8,
                       padding: 5,
                       borderRadius: 2,
                       display: "flex",
@@ -162,7 +143,6 @@ function Login() {
               startIcon={
                 <div
                   style={{
-                    marginRight: 8,
                     padding: 5,
                     borderRadius: 2,
                     display: "flex",

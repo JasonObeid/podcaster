@@ -4,7 +4,7 @@ import Button from "@material-ui/core/Button";
 import { Theme } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/styles";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) => ({
   button: {
@@ -21,7 +21,12 @@ export default function Logo() {
   const classes = useStyles();
 
   return (
-    <Button color="primary" className={classes.button} component={Link} to="/">
+    <Button
+      color="primary"
+      className={classes.button}
+      component={NavLink}
+      to="/"
+    >
       <Typography variant="h6" component="h1" className={classes.headerText}>
         podcaster
       </Typography>

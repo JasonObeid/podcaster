@@ -1,7 +1,7 @@
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import SearchIcon from "@material-ui/icons/Search";
+import SearchIcon from "@material-ui/icons/SearchRounded";
 import React from "react";
 import { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
@@ -70,7 +70,7 @@ function Search({
   };
 
   return (
-    <React.Fragment>
+    <>
       <Box
         display="flex"
         flexGrow={1}
@@ -98,13 +98,7 @@ function Search({
           Search
         </Button>
       </Box>
-      <Grid
-        container
-        spacing={3}
-        direction="column"
-        alignItems="stretch"
-        component={"article"}
-      >
+      <Grid container spacing={3} direction="column" alignItems="stretch">
         {searchResults !== undefined &&
           searchResults.map((podcast) => (
             <Grid item key={podcast.id} component="article">
@@ -121,7 +115,7 @@ function Search({
             </Grid>
           ))}
       </Grid>
-    </React.Fragment>
+    </>
   );
 }
 

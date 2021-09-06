@@ -16,13 +16,7 @@ function Subscriptions({
 }: SubscriptionsProps) {
   if (subscriptions.length > 0) {
     return (
-      <Grid
-        container
-        spacing={3}
-        direction="column"
-        alignItems="stretch"
-        component={"article"}
-      >
+      <Grid container spacing={3} direction="column" alignItems="stretch">
         {subscriptions.map((podcast) => (
           <Grid item key={podcast.id}>
             <Podcast

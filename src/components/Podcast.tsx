@@ -5,7 +5,7 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import React, { Fragment } from "react";
+import React from "react";
 import { useEffect, useState } from "react";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { useLocation, useParams } from "react-router";
@@ -17,11 +17,13 @@ import { auth } from "../config/firebase";
 import { updateSubscriptionsDatabase } from "../utils/databaseMutations";
 import { podcastParams, PodcastProps } from "../types/podcast";
 import { Image, Transformation } from "cloudinary-react";
+import Skeleton from "@material-ui/lab/Skeleton";
+import clsx from "clsx";
 
 const useStyles = makeStyles({
   container: {
     display: "grid",
-    gridTemplateColumns: "minmax(600px, 3fr) minmax(88px, 96px)",
+    gridTemplateColumns: "3fr minmax(88px, 96px)",
     gridTemplateRows: "1fr",
     gap: "0px 24px",
     gridAutoFlow: "row",
@@ -29,7 +31,13 @@ const useStyles = makeStyles({
     alignItems: "center",
   },
   podcast: { marginBottom: "48px" },
-  content: { gridArea: "content" },
+  content: {
+    gridArea: "content",
+    display: "-webkit-box",
+    "-webkit-line-clamp": "4",
+    "-webkit-box-orient": "vertical",
+    overflow: "hidden",
+  },
   icon: {
     gridArea: "icon",
     display: "flex",
@@ -37,11 +45,15 @@ const useStyles = makeStyles({
     justifyContent: "center",
   },
   rounded: {
-    borderRadius: "8px",
+    borderRadius: "4px",
   },
   header: {
     display: "flex",
     alignItems: "center",
+    padding: 16,
+    paddingBottom: 0,
+  },
+  skeletonHeader: {
     padding: 16,
     paddingBottom: 0,
   },
@@ -139,75 +151,140 @@ function Podcast({
     }
   }
 
-  return (
-    <Fragment>
-      {podcast !== undefined ? (
+  function getPodcastCard() {
+    return (
+      <>
+        {podcast !== undefined ? (
+          <Card
+            component="article"
+            className={
+              location.pathname.includes("podcast") ? classes.podcast : ""
+            }
+          >
+            <div className={classes.header}>
+              {location.pathname.includes("podcast") ? (
+                <Typography variant="h5" component="h5">
+                  {podcast.title}
+                </Typography>
+              ) : (
+                <MuiLink
+                  component={Link}
+                  variant="h5"
+                  to={`/podcast/${podcast.id}`}
+                >
+                  {podcast.title}
+                </MuiLink>
+              )}
+            </div>
+            <CardContent className={classes.container}>
+              <>
+                <div className={classes.content}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    component="p"
+                  >
+                    {podcast.description}
+                  </Typography>
+                </div>
+                <div className={classes.icon}>
+                  <Image
+                    publicId={getImage(podcast.artwork, podcast.image)}
+                    type="fetch"
+                    className={classes.rounded}
+                    alt={podcast.title}
+                  >
+                    <Transformation
+                      width="auto"
+                      height={80}
+                      crop="fill"
+                      quality="auto"
+                    />
+                  </Image>
+                </div>
+              </>
+            </CardContent>
+            <CardActions>
+              <Button size="small" color="primary" onClick={onPressButton}>
+                {isSubscribed() ? "Unsubscribe" : "Subscribe"}
+              </Button>
+            </CardActions>
+          </Card>
+        ) : null}
+        {feed !== undefined && location.pathname.includes("podcast") ? (
+          <>
+            <Typography variant="h6" component="h6">
+              Episodes
+            </Typography>
+            <Feeds
+              episodes={feed}
+              playbackStates={playbackStates}
+              activeEpisode={activeEpisode}
+              setActiveEpisode={setActiveEpisode}
+              isPlaying={isPlaying}
+              setIsPlaying={setIsPlaying}
+            ></Feeds>
+          </>
+        ) : null}
+      </>
+    );
+  }
+
+  function getPodcastSkeleton() {
+    return (
+      <>
         <Card
+          component="article"
           className={
             location.pathname.includes("podcast") ? classes.podcast : ""
           }
         >
-          <div className={classes.header}>
-            {location.pathname.includes("podcast") ? (
-              <Typography variant="h5" component="h5">
-                {podcast.title}
-              </Typography>
-            ) : (
-              <MuiLink
-                component={Link}
-                variant="h5"
-                to={`/podcast/${podcast.id}`}
-              >
-                {podcast.title}
-              </MuiLink>
-            )}
+          <div className={clsx(classes.skeletonHeader, classes.container)}>
+            <>
+              <div className={classes.content}>
+                <Skeleton variant="rect" height={32} />
+              </div>
+              <div className={classes.icon}></div>
+            </>
           </div>
           <CardContent className={classes.container}>
-            <Fragment>
+            <>
               <div className={classes.content}>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  {podcast.description}
-                </Typography>
+                <Skeleton variant="rect" height={80} />
               </div>
               <div className={classes.icon}>
-                <Image
-                  publicId={getImage(podcast.artwork, podcast.image)}
-                  type="fetch"
-                  className={classes.rounded}
-                >
-                  <Transformation
-                    width="auto"
-                    height={80}
-                    crop="fill"
-                    alt={podcast.title}
-                  />
-                </Image>
+                <Skeleton variant="rect" height={80} width={80} />
               </div>
-            </Fragment>
+            </>
           </CardContent>
           <CardActions>
-            <Button size="small" color="primary" onClick={onPressButton}>
-              {isSubscribed() ? "Unsubscribe" : "Subscribe"}
-            </Button>
+            <Skeleton
+              variant="rect"
+              height={22}
+              width={90}
+              style={{ margin: "8px" }}
+            />
           </CardActions>
         </Card>
-      ) : null}
-      {feed !== undefined && location.pathname.includes("podcast") ? (
-        <Fragment>
-          <Typography variant="h6" component="h6">
-            Episodes
-          </Typography>
-          <Feeds
-            episodes={feed}
-            playbackStates={playbackStates}
-            activeEpisode={activeEpisode}
-            setActiveEpisode={setActiveEpisode}
-            isPlaying={isPlaying}
-            setIsPlaying={setIsPlaying}
-          ></Feeds>
-        </Fragment>
-      ) : null}
-    </Fragment>
-  );
+        {feed !== undefined && location.pathname.includes("podcast") ? (
+          <>
+            <Typography variant="h6" component="h6">
+              Episodes
+            </Typography>
+            <Feeds
+              episodes={feed}
+              playbackStates={playbackStates}
+              activeEpisode={activeEpisode}
+              setActiveEpisode={setActiveEpisode}
+              isPlaying={isPlaying}
+              setIsPlaying={setIsPlaying}
+            ></Feeds>
+          </>
+        ) : null}
+      </>
+    );
+  }
+
+  return podcast !== undefined ? getPodcastCard() : getPodcastSkeleton();
 }
 export default Podcast;

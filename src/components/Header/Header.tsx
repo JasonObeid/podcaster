@@ -1,6 +1,6 @@
 import IconButton from "@material-ui/core/IconButton";
-import NavigateBeforeIcon from "@material-ui/icons/NavigateBefore";
-import NavigateNextIcon from "@material-ui/icons/NavigateNext";
+import NavigateBeforeIcon from "@material-ui/icons/NavigateBeforeRounded";
+import NavigateNextIcon from "@material-ui/icons/NavigateNextRounded";
 import React from "react";
 import { useHistory } from "react-router";
 

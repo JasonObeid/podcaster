@@ -1,5 +1,6 @@
 interface CloudinaryContextProps {
   cloudName: string;
+  style: any;
 }
 
 interface ImageProps extends JSX.IntrinsicElements.img {
@@ -13,25 +14,28 @@ interface VideoProps extends JSX.IntrinsicElements.video {
 
 interface TransformationProps {
   quality: string;
+  width: string | number;
+  height: string | number;
+  crop: string;
 }
 
 declare module "cloudinary-react" {
   class CloudinaryComponent {
-    constructor(props, context) {}
+    constructor(props, context): CloudinaryComponent;
 
-    getChildContext() {}
+    getChildContext(): any;
 
-    render() {}
+    render(): any;
 
-    getChildTransformations(children) {}
+    getChildTransformations(children): any;
 
-    getTransformations() {}
+    getTransformations(): any;
 
-    normalizeOptions(...options) {}
+    normalizeOptions(...options): any;
 
-    getURL(extendedProps) {}
+    getURL(extendedProps): any;
 
-    typesFrom(configParams) {}
+    typesFrom(configParams): any;
   }
 
   export const CloudinaryContext: React.FC<CloudinaryContextProps>;

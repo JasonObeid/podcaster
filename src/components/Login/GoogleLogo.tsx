@@ -4,10 +4,10 @@ export function GoogleLogo({ disabled }: { disabled: boolean }): JSX.Element {
   return (
     <div
       style={{
-        marginRight: 8,
+        margin: 4,
         background: !disabled ? "#eee" : "#fff",
-        padding: 8,
-        borderRadius: 2,
+        padding: 4,
+        borderRadius: "100%",
         display: "flex",
         alignItems: "center",
       }}

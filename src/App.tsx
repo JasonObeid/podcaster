@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Switch, Route, useLocation } from "react-router-dom";
 import { auth, database, ref } from "./config/firebase";
 import { usePodcastIndex } from "./context/PodcastIndexContext";
 import { Types } from "podcastindexjs";
 import Sidebar from "./components/Sidebar";
-import Home from "./components/Feeds";
-import Search from "./components/Search";
-import Subscriptions from "./components/Subscriptions";
+const Home = lazy(() => import("./components/Feeds"));
+const Subscriptions = lazy(() => import("./components/Subscriptions"));
+const Login = lazy(() => import("./components/Login/Login"));
+const Search = lazy(() => import("./components/Search"));
 import { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Podcast from "./components/Podcast";
@@ -16,7 +17,6 @@ import {
   isSubscription,
   useQueriesTyped,
 } from "./utils/utils";
-import Login from "./components/Login/Login";
 import { get } from "firebase/database";
 import { User } from "firebase/auth";
 import AlbumArt from "./components/Footer/AlbumArt";
@@ -24,6 +24,7 @@ import Header from "./components/Header/Header";
 import Logo from "./components/Header/Logo";
 import Footer from "./components/Footer/Footer";
 import Fade from "@material-ui/core/Fade";
+import { useQuery } from "react-query";
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -43,6 +44,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     alignItems: "center",
     padding: "0px 24px",
+    paddingRight: "280px",
   },
   navigation: {
     gridArea: "navigation",
@@ -53,8 +55,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflowY: "auto",
     overflowX: "hidden",
     padding: "0px 24px",
+    paddingRight: "280px",
     marginTop: "8px",
     marginBottom: "8px",
+    minWidth: "720px",
   },
   controls: {
     gridArea: "controls",
@@ -86,34 +90,25 @@ function App() {
   >(undefined);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  async function getFeedEpisodes(feedId: number) {
-    const subscriptionEpisodes = await client.episodesByFeedId(feedId, {
-      max: 10,
-      fulltext: true,
-    });
-    return subscriptionEpisodes.items;
+  const [maxEpisodes, setMaxEpisodes] = useState<number>(10);
+  const feedIds = subscriptions.map((sub) => sub.id);
+  const fetchedFeed = useQuery(
+    `episodesByFeedId/${feedIds.join(",")}/${maxEpisodes}`,
+    getFeedEpisodes,
+  );
+  const episodes = fetchedFeed?.data;
+
+  async function getFeedEpisodes() {
+    if (feedIds.length > 0) {
+      const subscriptionEpisodes = await client.episodesByFeedId(feedIds, {
+        max: maxEpisodes,
+        fulltext: true,
+      });
+      return subscriptionEpisodes.items;
+    }
   }
 
-  const userQueries = useQueriesTyped(
-    subscriptions.map((sub) => {
-      return {
-        queryKey: ["episodesByFeedId", sub.id],
-        queryFn: () => getFeedEpisodes(sub.id),
-      };
-    }),
-  );
-
-  const episodes = userQueries.flatMap((feedQuery) =>
-    feedQuery.isSuccess && feedQuery.data !== undefined ? feedQuery.data : [],
-  );
-
-  const sortedEpisodes = episodes.flat().sort(function (a, b) {
-    const dateA = a.datePublished;
-    const dateB = b.datePublished;
-    if (dateA === dateB) return 0;
-
-    return dateA < dateB ? 1 : -1;
-  });
+  const sortedEpisodes = episodes !== undefined ? episodes : [];
 
   async function loadSubscriptionsStateFromDatabase(user: User) {
     try {
@@ -177,6 +172,16 @@ function App() {
     });
   }, []);
 
+  // const [isNewPage, setIsNewPage] = useState(true);
+
+  // // Monitor route.
+  // useEffect(() => {
+  //   setIsNewPage(false);
+  //   setTimeout(() => {
+  //     setIsNewPage(true);
+  //   }, 200);
+  // }, [location.pathname]);
+
   return (
     <div className={classes.container}>
       <header className={classes.logo}>
@@ -189,9 +194,10 @@ function App() {
         <Sidebar />
       </nav>
       <main className={classes.content}>
-        <Switch location={location}>
-          <Route exact path="/">
-            <Fade>
+        {/* <Fade in={isNewPage}> */}
+        <Suspense fallback={null}>
+          <Switch location={location}>
+            <Route exact path="/">
               <Home
                 episodes={sortedEpisodes}
                 playbackStates={playbackStates}
@@ -200,78 +206,79 @@ function App() {
                 isPlaying={isPlaying}
                 setIsPlaying={setIsPlaying}
               ></Home>
-            </Fade>
-          </Route>
-          <Route path="/search/:term">
-            <Search
-              subscriptions={subscriptions}
-              setSubscriptions={setSubscriptions}
-              playbackStates={playbackStates}
-              activeEpisode={activeEpisode}
-              setActiveEpisode={setActiveEpisode}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-            />
-          </Route>
-          <Route path="/search/:term">
-            <Search
-              subscriptions={subscriptions}
-              setSubscriptions={setSubscriptions}
-              playbackStates={playbackStates}
-              activeEpisode={activeEpisode}
-              setActiveEpisode={setActiveEpisode}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-            />
-          </Route>
-          <Route path="/search">
-            <Search
-              subscriptions={subscriptions}
-              setSubscriptions={setSubscriptions}
-              playbackStates={playbackStates}
-              activeEpisode={activeEpisode}
-              setActiveEpisode={setActiveEpisode}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-            />
-          </Route>
-          <Route exact path="/episode/:episodeId">
-            <Episode
-              episodeId={undefined}
-              playbackStates={playbackStates}
-              activeEpisode={activeEpisode}
-              setActiveEpisode={setActiveEpisode}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-            ></Episode>
-          </Route>
-          <Route exact path="/subscriptions">
-            <Subscriptions
-              subscriptions={subscriptions}
-              setSubscriptions={setSubscriptions}
-              playbackStates={playbackStates}
-              activeEpisode={activeEpisode}
-              setActiveEpisode={setActiveEpisode}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-            />
-          </Route>
-          <Route exact path="/settings">
-            <Login></Login>
-          </Route>
-          <Route exact path="/podcast/:podcastId">
-            <Podcast
-              podcastId={undefined}
-              subscriptions={subscriptions}
-              setSubscriptions={setSubscriptions}
-              playbackStates={playbackStates}
-              activeEpisode={activeEpisode}
-              setActiveEpisode={setActiveEpisode}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-            ></Podcast>
-          </Route>
-        </Switch>
+            </Route>
+            <Route path="/search/:term">
+              <Search
+                subscriptions={subscriptions}
+                setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              />
+            </Route>
+            <Route path="/search/:term">
+              <Search
+                subscriptions={subscriptions}
+                setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              />
+            </Route>
+            <Route path="/search">
+              <Search
+                subscriptions={subscriptions}
+                setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              />
+            </Route>
+            <Route exact path="/episode/:episodeId">
+              <Episode
+                episodeId={undefined}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              ></Episode>
+            </Route>
+            <Route exact path="/subscriptions">
+              <Subscriptions
+                subscriptions={subscriptions}
+                setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              />
+            </Route>
+            <Route exact path="/settings">
+              <Login></Login>
+            </Route>
+            <Route exact path="/podcast/:podcastId">
+              <Podcast
+                podcastId={undefined}
+                subscriptions={subscriptions}
+                setSubscriptions={setSubscriptions}
+                playbackStates={playbackStates}
+                activeEpisode={activeEpisode}
+                setActiveEpisode={setActiveEpisode}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+              ></Podcast>
+            </Route>
+          </Switch>
+        </Suspense>
+        {/* </Fade> */}
       </main>
       <footer className={classes.controls}>
         <Footer

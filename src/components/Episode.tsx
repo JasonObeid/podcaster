@@ -1,24 +1,25 @@
-import Box from "@material-ui/core/Box";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
-import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
-import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
+import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilledRounded";
+import PlayCircleFilledWhiteIcon from "@material-ui/icons/PlayCircleFilledWhiteRounded";
 import { auth } from "../config/firebase";
 import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/styles";
 import { Link as MuiLink } from "@material-ui/core";
 import { useLocation, useParams } from "react-router";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { usePodcastIndex } from "../context/PodcastIndexContext";
 import { getImage } from "../utils/utils";
 import { useQuery } from "react-query";
 import { updateActiveEpisodeDatabase } from "../utils/databaseMutations";
 import { episodeParams, EpisodeProps } from "../types/episode";
 import { Image, Transformation } from "cloudinary-react";
+import Skeleton from "@material-ui/lab/Skeleton";
+import { PIApiEpisodeDetail } from "podcastindexjs/lib/types";
 
 const useStyles = makeStyles({
   endItems: {
@@ -28,7 +29,7 @@ const useStyles = makeStyles({
     alignItems: "center",
   },
   rounded: {
-    borderRadius: "8px",
+    borderRadius: "4px",
   },
   play: {
     display: "flex",
@@ -105,7 +106,10 @@ function Episode({
     }
   }
 
-  const { data } = useQuery(`episodeById/${episodeIdState}`, fetchEpisode);
+  const { data, isLoading } = useQuery(
+    `episodeById/${episodeIdState}`,
+    fetchEpisode,
+  );
   const episode = data?.episode;
 
   async function getEpisodeFromId() {
@@ -121,9 +125,8 @@ function Episode({
     getEpisodeFromId();
   }, []);
 
-  if (episode !== undefined) {
+  function getEpisodeCard(episode: PIApiEpisodeDetail) {
     const episodeDescriptionNode = getDescriptionHTML(episode.description);
-
     return (
       <Card>
         <div className={classes.header}>
@@ -170,29 +173,40 @@ function Episode({
                 variant="body2"
                 color="textSecondary"
                 component="p"
-                className={classes.text}
+                className={
+                  !location.pathname.includes("episode")
+                    ? classes.text
+                    : undefined
+                }
               >
                 {episodeDescriptionNode.textContent || ""}
               </Typography>
             </Grid>
-            <Grid item xs={3} className={classes.endItems}>
+            <Grid
+              item
+              xs={3}
+              className={classes.endItems}
+              component={NavLink}
+              to={`/podcast/${episode.feedId}`}
+            >
               <Image
                 publicId={getImage(episode.image, episode.feedImage)}
                 type="fetch"
                 className={classes.rounded}
+                alt={episode.title}
               >
                 <Transformation
                   width="auto"
                   height={48}
                   crop="fill"
-                  alt={episode.title}
+                  quality="auto"
                 />
               </Image>
               <IconButton onClick={onPressButton} color="secondary">
                 {isPlaying && activeEpisode?.id === episode.id ? (
                   <PauseCircleFilledIcon fontSize="large" />
                 ) : (
-                  <PlayCircleFilledIcon fontSize="large" />
+                  <PlayCircleFilledWhiteIcon fontSize="large" />
                 )}
               </IconButton>
             </Grid>
@@ -209,7 +223,52 @@ function Episode({
       </Card>
     );
   }
-  return null;
+
+  function getEpisodeSkeleton() {
+    return (
+      <Card>
+        <div className={classes.header}>
+          <Grid
+            container
+            spacing={1}
+            alignItems="center"
+            justifyContent="space-between"
+            wrap="nowrap"
+          >
+            <Grid item xs={9}>
+              <Skeleton variant="rect" height={20} />
+            </Grid>
+            <Grid item xs={3} className={classes.endItems}>
+              <Skeleton variant="rect" width={40} height={20} />
+              <Skeleton variant="rect" width={40} height={20} />
+            </Grid>
+          </Grid>
+        </div>
+        <CardContent>
+          <Grid
+            container
+            spacing={1}
+            alignItems="center"
+            justifyContent="space-between"
+            wrap="nowrap"
+          >
+            <Grid item xs={9}>
+              <Skeleton variant="rect" height={80} />
+            </Grid>
+            <Grid item xs={3} className={classes.endItems}>
+              <Skeleton variant="rect" width={48} height={48} />
+              <Skeleton variant="circle" width={35} height={35} />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (episode !== undefined) {
+    return getEpisodeCard(episode);
+  }
+  return getEpisodeSkeleton();
 }
 
 export default Episode;

@@ -2,10 +2,10 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import HomeIcon from "@material-ui/icons/Home";
-import SearchIcon from "@material-ui/icons/Search";
-import SettingsIcon from "@material-ui/icons/Settings";
-import SubscriptionsIcon from "@material-ui/icons/Subscriptions";
+import HomeIcon from "@material-ui/icons/HomeRounded";
+import SearchIcon from "@material-ui/icons/SearchRounded";
+import SettingsIcon from "@material-ui/icons/SettingsRounded";
+import SubscriptionsIcon from "@material-ui/icons/SubscriptionsRounded";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -22,7 +22,7 @@ function Sidebar() {
   const location = useLocation();
 
   return (
-    <React.Fragment>
+    <>
       <List component="nav" aria-label="home search subscriptions settings">
         <ListItem
           component={Link}
@@ -70,7 +70,7 @@ function Sidebar() {
           <ListItemText primary="Settings" />
         </ListItem>
       </List>
-    </React.Fragment>
+    </>
   );
 }
 

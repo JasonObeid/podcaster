@@ -1,13 +1,13 @@
 import IconButton from "@material-ui/core/IconButton";
 import Slider from "@material-ui/core/Slider";
-import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilled";
-import PlayCircleFilledIcon from "@material-ui/icons/PlayCircleFilled";
-import RepeatIcon from "@material-ui/icons/Repeat";
-import ShuffleIcon from "@material-ui/icons/Shuffle";
-import SkipNextIcon from "@material-ui/icons/SkipNext";
-import SkipPreviousIcon from "@material-ui/icons/SkipPrevious";
-import VolumeOffIcon from "@material-ui/icons/VolumeOff";
-import VolumeUpIcon from "@material-ui/icons/VolumeUp";
+import PauseCircleFilledIcon from "@material-ui/icons/PauseCircleFilledRounded";
+import PlayCircleFilledWhiteIcon from "@material-ui/icons/PlayCircleFilledWhiteRounded";
+import RepeatIcon from "@material-ui/icons/RepeatRounded";
+import ShuffleIcon from "@material-ui/icons/ShuffleRounded";
+import SkipNextIcon from "@material-ui/icons/SkipNextRounded";
+import SkipPreviousIcon from "@material-ui/icons/SkipPreviousRounded";
+import VolumeOffIcon from "@material-ui/icons/VolumeOffRounded";
+import VolumeUpIcon from "@material-ui/icons/VolumeUpRounded";
 import React, { useEffect, useRef, useState } from "react";
 import { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
@@ -59,8 +59,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     margin: "0px 80px",
     display: "flex",
+    justifyContent: "center",
   },
-  playbackTimer: { marginInline: "24px" },
+  playbackTimer: { marginInline: "24px", width: "35vw" },
   muteButton: { marginRight: "16px" },
   muteButtonActive: {
     marginRight: "16px",
@@ -321,7 +322,7 @@ export default function Footer({
           {isPlaying ? (
             <PauseCircleFilledIcon fontSize="large" />
           ) : (
-            <PlayCircleFilledIcon fontSize="large" />
+            <PlayCircleFilledWhiteIcon fontSize="large" />
           )}
         </IconButton>
         <IconButton

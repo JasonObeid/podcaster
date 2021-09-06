@@ -13,6 +13,7 @@ import { ThemeProvider, createTheme } from "@material-ui/core";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { CloudinaryContext } from "cloudinary-react";
+import * as LabThemeTypes from "@material-ui/lab/themeAugmentation";
 
 const theme = createTheme({
   palette: {
@@ -23,17 +24,35 @@ const theme = createTheme({
       light: blueGrey[50],
     },
     secondary: {
-      dark: teal[900],
-      main: teal[800],
+      dark: teal[700],
+      main: teal[600],
       light: teal[100],
     },
     info: {
       main: blueGrey[100],
     },
   },
+  overrides: {
+    MuiSkeleton: {
+      rect: {
+        borderRadius: "4px",
+      },
+    },
+  },
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      cacheTime: 1000 * 60 * 30,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchInterval: false,
+      staleTime: 1000 * 60 * 30,
+    },
+  },
+});
 
 const VITE_CLOUDINARY_NAME = import.meta.env.VITE_CLOUDINARY_NAME;
 if (typeof VITE_CLOUDINARY_NAME !== "string")

@@ -9,18 +9,31 @@ export default function Header() {
 
   return (
     <>
-      <IconButton
-        onClick={() => history.goBack()}
-        // disabled={!isHistoryRoot(history)}
-      >
+      <IconButton onClick={() => history.goBack()}>
         <NavigateBeforeIcon />
       </IconButton>
-      <IconButton
-        onClick={() => history.goForward()}
-        // disabled={!isHistoryLeaf(history)}
-      >
+      <IconButton onClick={() => history.goForward()}>
         <NavigateNextIcon />
       </IconButton>
     </>
   );
+
+  // const canGoBack = history.action !== "POP";
+  // const canGoForward = history.action !== "PUSH";
+  // return (
+  //   <>
+  //     <IconButton
+  //       onClick={() => (canGoBack ? history.goBack() : undefined)}
+  //       disabled={!canGoBack}
+  //     >
+  //       <NavigateBeforeIcon />
+  //     </IconButton>
+  //     <IconButton
+  //       onClick={() => (canGoForward ? history.goForward() : undefined)}
+  //       disabled={!canGoForward}
+  //     >
+  //       <NavigateNextIcon />
+  //     </IconButton>
+  //   </>
+  // );
 }

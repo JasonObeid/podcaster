@@ -106,10 +106,7 @@ function Episode({
     }
   }
 
-  const { data, isLoading } = useQuery(
-    `episodeById/${episodeIdState}`,
-    fetchEpisode,
-  );
+  const { data } = useQuery(`episodeById/${episodeIdState}`, fetchEpisode);
   const episode = data?.episode;
 
   async function getEpisodeFromId() {
@@ -182,26 +179,38 @@ function Episode({
                 {episodeDescriptionNode.textContent || ""}
               </Typography>
             </Grid>
-            <Grid
-              item
-              xs={3}
-              className={classes.endItems}
-              component={NavLink}
-              to={`/podcast/${episode.feedId}`}
-            >
-              <Image
-                publicId={getImage(episode.image, episode.feedImage)}
-                type="fetch"
-                className={classes.rounded}
-                alt={episode.title}
-              >
-                <Transformation
-                  width="auto"
-                  height={48}
-                  crop="fill"
-                  quality="auto"
-                />
-              </Image>
+            <Grid item xs={3} className={classes.endItems}>
+              {location.pathname.includes("podcast") ? (
+                <Image
+                  publicId={getImage(episode.image, episode.feedImage)}
+                  type="fetch"
+                  className={classes.rounded}
+                  alt={episode.title}
+                >
+                  <Transformation
+                    width="auto"
+                    height={48}
+                    crop="fill"
+                    quality="auto"
+                  />
+                </Image>
+              ) : (
+                <NavLink to={`/podcast/${episode.feedId}`}>
+                  <Image
+                    publicId={getImage(episode.image, episode.feedImage)}
+                    type="fetch"
+                    className={classes.rounded}
+                    alt={episode.title}
+                  >
+                    <Transformation
+                      width="auto"
+                      height={48}
+                      crop="fill"
+                      quality="auto"
+                    />
+                  </Image>
+                </NavLink>
+              )}
               <IconButton onClick={onPressButton} color="secondary">
                 {isPlaying && activeEpisode?.id === episode.id ? (
                   <PauseCircleFilledIcon fontSize="large" />

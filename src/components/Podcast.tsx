@@ -1,4 +1,4 @@
-import { Link as MuiLink } from "@material-ui/core";
+import { Box, Link as MuiLink } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
@@ -19,7 +19,9 @@ import { podcastParams, PodcastProps } from "../types/podcast";
 import { Image, Transformation } from "cloudinary-react";
 import Skeleton from "@material-ui/lab/Skeleton";
 import clsx from "clsx";
-
+// import FilterListIcon from "@material-ui/icons/FilterList";
+// import { useDebounce } from "@react-hook/debounce";
+// import ClearIcon from "@material-ui/icons/Clear";
 const useStyles = makeStyles({
   container: {
     display: "grid",
@@ -87,12 +89,12 @@ function Podcast({
   );
   const podcast = fetchedPodcast?.data;
 
+  const podcastFeedId = feedId || podcast?.id;
   const fetchedFeed = useQuery(
-    `episodesByFeedId/${feedId}`,
+    `episodesByFeedId/${podcastFeedId}`,
     getFeedFromPodcastId,
   );
   const feed = fetchedFeed?.data;
-
   async function getPodcastFromId() {
     if (podcastIdState !== undefined) {
       const podcast = await client.podcastById(podcastIdState);
@@ -102,8 +104,8 @@ function Podcast({
   }
 
   async function getFeedFromPodcastId() {
-    if (feedId !== undefined && podcast !== undefined) {
-      const episodes = await client.episodesByFeedId(feedId);
+    if (podcastFeedId !== undefined) {
+      const episodes = await client.episodesByFeedId(podcastFeedId);
       return episodes.items;
     }
   }
@@ -150,6 +152,25 @@ function Podcast({
       updateSubscriptionsDatabase(newSubscriptions, auth.currentUser);
     }
   }
+
+  // const [searchText, setSearchText] = useState("");
+  // const [searchFilterText, setSearchFilterText] = useDebounce("", 200);
+
+  // function handleFilterTextChange(event: React.ChangeEvent<HTMLInputElement>) {
+  //   setSearchText(event.target.value);
+  //   setSearchFilterText(event.target.value);
+  // }
+
+  // function onClearFilter() {
+  //   setSearchText("");
+  //   setSearchFilterText("");
+  // }
+
+  // const filteredFeeds = feed?.filter(
+  //   (feed) =>
+  //     feed.title.toLowerCase().includes(searchFilterText.toLowerCase()) ||
+  //     feed.description.toLowerCase().includes(searchFilterText.toLowerCase()),
+  // );
 
   function getPodcastCard() {
     return (
@@ -211,11 +232,33 @@ function Podcast({
             </CardActions>
           </Card>
         ) : null}
-        {feed !== undefined && location.pathname.includes("podcast") ? (
+        {!location.pathname.includes("subscriptions") && feed !== undefined ? (
           <>
-            <Typography variant="h6" component="h6">
-              Episodes
-            </Typography>
+            <Box
+              display="flex"
+              flexGrow={1}
+              justifyContent="space-between"
+              alignItems="flex-end"
+              marginBottom="8px"
+            >
+              <Typography variant="h6" component="h6">
+                Episodes
+              </Typography>
+              {/* <TextField
+                label="Filter Episodes"
+                value={searchText}
+                onChange={handleFilterTextChange}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={onClearFilter} color="secondary">
+                        <ClearIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              /> */}
+            </Box>
             <Feeds
               episodes={feed}
               playbackStates={playbackStates}

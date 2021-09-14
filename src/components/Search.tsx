@@ -60,14 +60,14 @@ function Search({
     }
   }
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setSearchText(event.target.value);
     setSearchQueryText(event.target.value);
-  };
+  }
 
-  const runQuery = () => {
+  function runQuery() {
     setSearchQueryText(searchText);
-  };
+  }
 
   return (
     <>

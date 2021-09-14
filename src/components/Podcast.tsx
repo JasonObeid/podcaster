@@ -232,7 +232,7 @@ function Podcast({
             </CardActions>
           </Card>
         ) : null}
-        {!location.pathname.includes("subscriptions") && feed !== undefined ? (
+        {location.pathname.includes("podcast") && feed !== undefined ? (
           <>
             <Box
               display="flex"

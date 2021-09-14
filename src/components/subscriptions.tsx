@@ -34,7 +34,7 @@ function Subscriptions({
       </Grid>
     );
   } else {
-    return <Typography>No Active Subscriptions</Typography>;
+    return <Typography>No active subscriptions</Typography>;
   }
 }
 

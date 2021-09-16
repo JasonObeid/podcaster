@@ -18,7 +18,7 @@ Front-end Tech:
 - [PodcastIndexJS](https://github.com/JasonObeid/PodcastIndexJS) (A library I created to interact with the Podcast Index)
 
 External APIs:
-- [Podcast Index](https://podcastindex.org/) (Free and open index of categorized podcast)
+- [Podcast Index](https://podcastindex.org/) (Free and open index of categorized podcasts)
 - Cloudinary (For dynamic image resizing)
 - Firebase (For database + authentication)
 

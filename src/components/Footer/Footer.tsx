@@ -266,14 +266,31 @@ export default function Footer({
     return index;
   }
 
+  function getRandomItem(list: number[]) {
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
   function handleNext(episodeID: number) {
     const index = getEpisodeIndexWithinFeed(episodeID);
-    const newIndex = index < episodes.length ? index + 1 : episodes.length - 1;
-    if (index !== newIndex) {
+    if (controls.isShuffle) {
+      const validIndices = episodes
+        .map((_episode, episodeIndex) => episodeIndex)
+        .filter((episodeIndex) => episodeIndex !== index);
+      const newIndex = getRandomItem(validIndices);
       if (episodes[newIndex] !== undefined) {
         const newEpisode = episodes[newIndex];
         setActiveEpisode(newEpisode);
         updateActiveEpisodeDatabase(newEpisode, auth.currentUser);
+      }
+    } else {
+      const newIndex =
+        index < episodes.length ? index + 1 : episodes.length - 1;
+      if (index !== newIndex) {
+        if (episodes[newIndex] !== undefined) {
+          const newEpisode = episodes[newIndex];
+          setActiveEpisode(newEpisode);
+          updateActiveEpisodeDatabase(newEpisode, auth.currentUser);
+        }
       }
     }
   }
@@ -295,7 +312,7 @@ export default function Footer({
       <div className={classes.playback}>
         <IconButton
           onClick={handleShuffleChange}
-          aria-label={controls.isShuffle ? "pause" : "play"}
+          aria-label={controls.isShuffle ? "shuffle_off" : "shuffle"}
           className={
             controls.isShuffle ? classes.shuffleButtonActive : undefined
           }
@@ -303,7 +320,7 @@ export default function Footer({
           <ShuffleIcon />
         </IconButton>
         <IconButton
-          aria-label="play previous"
+          aria-label="play_previous"
           onClick={() =>
             activeEpisode !== undefined
               ? handlePrevious(activeEpisode.id)
@@ -326,7 +343,7 @@ export default function Footer({
           )}
         </IconButton>
         <IconButton
-          aria-label="play next"
+          aria-label="play_next"
           onClick={() =>
             activeEpisode !== undefined ? handleNext(activeEpisode.id) : null
           }
@@ -334,7 +351,7 @@ export default function Footer({
           <SkipNextIcon />
         </IconButton>
         <IconButton
-          aria-label={controls.isRepeat ? "repeat" : "no repeat"}
+          aria-label={controls.isRepeat ? "no_repeat" : "repeat"}
           onClick={handleRepeatChange}
           className={controls.isRepeat ? classes.repeatButtonActive : undefined}
         >
@@ -353,8 +370,8 @@ export default function Footer({
         </IconButton>
         <Slider
           value={controls.volume}
-          getAriaValueText={() => `volume is ${controls.volume * 100}%`}
-          aria-labelledby="volume-slider"
+          getAriaValueText={() => `volume_is_${controls.volume * 100}%`}
+          aria-label="volume-slider"
           onChange={(e, newValue) => handleVolumeChange(newValue)}
           min={0}
           step={0.01}
@@ -369,7 +386,11 @@ export default function Footer({
           playing={isPlaying}
           onTickedCallback={handleProgress}
         ></Player>
-        <Typography variant="subtitle2" color="textSecondary">
+        <Typography
+          component="label"
+          variant="subtitle2"
+          style={{ color: "hsl(0deg 0% 0% / 71%)" }}
+        >
           {convertSecondsToTime(getCurrentPlayback())}
         </Typography>
         <Slider
@@ -378,16 +399,20 @@ export default function Footer({
           value={getCurrentPlayback()}
           getAriaValueText={() =>
             activeEpisode !== undefined
-              ? `current time is ${getCurrentPlayback()} seconds`
+              ? `current_time_is_${getCurrentPlayback()}_seconds`
               : ""
           }
-          aria-labelledby="time-slider"
+          aria-label="time-slider"
           onChange={(e, newValue) => handleSeekChange(newValue)}
           min={0}
           step={1}
           max={activeEpisode !== undefined ? activeEpisode.duration : 0}
         />
-        <Typography variant="subtitle2" color="textSecondary">
+        <Typography
+          component="label"
+          variant="subtitle2"
+          style={{ color: "hsl(0deg 0% 0% / 71%)" }}
+        >
           {convertSecondsToTime(
             activeEpisode !== undefined ? activeEpisode.duration : 0,
           )}

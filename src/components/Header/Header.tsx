@@ -9,10 +9,13 @@ export default function Header() {
 
   return (
     <>
-      <IconButton onClick={() => history.goBack()}>
+      <IconButton onClick={() => history.goBack()} aria-label="navigate_back">
         <NavigateBeforeIcon />
       </IconButton>
-      <IconButton onClick={() => history.goForward()}>
+      <IconButton
+        onClick={() => history.goForward()}
+        aria-label="navigate_forward"
+      >
         <NavigateNextIcon />
       </IconButton>
     </>

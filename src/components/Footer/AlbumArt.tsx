@@ -63,7 +63,12 @@ export default function AlbumArt({
           </Image>
         </NavLink>
       ) : (
-        <img height="56px" width="56px" className={classes.emptyIcon}></img>
+        <img
+          height="56px"
+          width="56px"
+          className={classes.emptyIcon}
+          alt="empty icon"
+        ></img>
       )}
       {activeEpisode !== undefined ? (
         <Box paddingLeft="16px">

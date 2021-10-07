@@ -24,8 +24,8 @@ const theme = createTheme({
       light: blueGrey[50],
     },
     secondary: {
-      dark: teal[700],
-      main: teal[600],
+      dark: teal[800],
+      main: teal[700],
       light: teal[100],
     },
     info: {

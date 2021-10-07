@@ -81,7 +81,7 @@ function Login() {
 
   return (
     <>
-      <Typography variant="h3" style={{ paddingBottom: "24px" }}>
+      <Typography variant="h3" component="h2" style={{ paddingBottom: "24px" }}>
         Welcome to Podcaster
       </Typography>
       {auth.currentUser === null ? (

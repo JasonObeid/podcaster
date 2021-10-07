@@ -25,7 +25,7 @@ import clsx from "clsx";
 const useStyles = makeStyles({
   container: {
     display: "grid",
-    gridTemplateColumns: "3fr minmax(88px, 96px)",
+    gridTemplateColumns: "3fr 1fr",
     gridTemplateRows: "1fr",
     gap: "0px 24px",
     gridAutoFlow: "row",
@@ -184,7 +184,7 @@ function Podcast({
           >
             <div className={classes.header}>
               {location.pathname.includes("podcast") ? (
-                <Typography variant="h5" component="h5">
+                <Typography variant="h5" component="h2">
                   {podcast.title}
                 </Typography>
               ) : (
@@ -241,7 +241,7 @@ function Podcast({
               alignItems="flex-end"
               marginBottom="8px"
             >
-              <Typography variant="h6" component="h6">
+              <Typography variant="h6" component="h3">
                 Episodes
               </Typography>
               {/* <TextField
@@ -311,7 +311,7 @@ function Podcast({
         </Card>
         {feed !== undefined && location.pathname.includes("podcast") ? (
           <>
-            <Typography variant="h6" component="h6">
+            <Typography variant="h6" component="h3">
               Episodes
             </Typography>
             <Feeds

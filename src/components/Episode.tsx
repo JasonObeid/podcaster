@@ -211,7 +211,11 @@ function Episode({
                   </Image>
                 </NavLink>
               )}
-              <IconButton onClick={onPressButton} color="secondary">
+              <IconButton
+                onClick={onPressButton}
+                color="secondary"
+                aria-label={`${isPlaying ? "pause" : "play"}_${episode.id}`}
+              >
                 {isPlaying && activeEpisode?.id === episode.id ? (
                   <PauseCircleFilledIcon fontSize="large" />
                 ) : (
@@ -228,6 +232,7 @@ function Episode({
             episode.id,
             episode.duration,
           )}
+          aria-label={`playback_${episode.title.replaceAll(" ", "_")}`}
         />
       </Card>
     );

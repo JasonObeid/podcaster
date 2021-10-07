@@ -36,11 +36,18 @@ export function getImage(artworkURI: string, imageURI: string) {
   return artworkURI;
 }
 
-export function getEpisodeAuthor(subscriptions: any[], feedId: any) {
+export function getEpisodeAuthor(
+  subscriptions: Types.PIApiPodcast[],
+  feedId: number,
+) {
   const subscription = subscriptions.find(
-    (subscription: { id: any }) => subscription.id === feedId,
+    (subscription) => subscription.id === feedId,
   );
-  if (subscription) return subscription.author;
+
+  if (subscription !== undefined) {
+    return subscription.author;
+  }
+
   return "";
 }
 

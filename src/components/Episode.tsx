@@ -109,7 +109,7 @@ function Episode({
   const { data } = useQuery(`episodeById/${episodeIdState}`, fetchEpisode);
   const episode = data?.episode;
 
-  async function getEpisodeFromId() {
+  function getEpisodeFromId() {
     if (episodeId !== undefined) {
       setEpisodeIdState(episodeId);
     } else if (params.episodeId !== undefined) {

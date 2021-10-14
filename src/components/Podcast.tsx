@@ -110,7 +110,7 @@ function Podcast({
     }
   }
 
-  async function getPodcastId() {
+  function getPodcastId() {
     if (podcastId !== undefined) {
       setPodcastIdState(podcastId);
     }

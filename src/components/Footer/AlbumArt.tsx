@@ -1,9 +1,8 @@
 import React from "react";
 import { Theme } from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/styles";
 import { Types } from "podcastindexjs";
-import { getEpisodeAuthor, getImage } from "../../utils/utils";
+import { getPodcastFromId, getImage } from "../../utils/utils";
 import Box from "@material-ui/core/Box";
 import { Link as MuiLink } from "@material-ui/core";
 import { Link, NavLink } from "react-router-dom";
@@ -16,10 +15,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   emptyIcon: {
     backgroundColor: theme.palette.primary.light,
     borderRadius: "4px",
+    height: "56px",
+    width: "56px",
   },
   title: {
     display: "-webkit-box",
-    "-webkit-line-clamp": "3",
+    "-webkit-line-clamp": "2",
     "-webkit-box-orient": "vertical",
     overflow: "hidden",
     color: theme.palette.primary.dark,
@@ -44,6 +45,11 @@ export default function AlbumArt({
 }) {
   const classes = useStyles();
 
+  const podcast =
+    activeEpisode !== undefined
+      ? getPodcastFromId(subscriptions, activeEpisode.feedId)
+      : null;
+
   return (
     <>
       {activeEpisode !== undefined ? (
@@ -52,7 +58,8 @@ export default function AlbumArt({
             publicId={getImage(activeEpisode.image, activeEpisode.feedImage)}
             type="fetch"
             className={classes.rounded}
-            alt={activeEpisode.title}
+            alt={podcast?.title}
+            title={podcast?.title}
           >
             <Transformation
               width="auto"
@@ -63,12 +70,7 @@ export default function AlbumArt({
           </Image>
         </NavLink>
       ) : (
-        <img
-          height="56px"
-          width="56px"
-          className={classes.emptyIcon}
-          alt="empty icon"
-        ></img>
+        <div className={classes.emptyIcon}></div>
       )}
       {activeEpisode !== undefined ? (
         <Box paddingLeft="16px">
@@ -78,6 +80,7 @@ export default function AlbumArt({
             className={classes.title}
             component={Link}
             to={`/episode/${activeEpisode.id}`}
+            title={activeEpisode.title}
           >
             {activeEpisode.title}
           </MuiLink>
@@ -87,10 +90,9 @@ export default function AlbumArt({
             component={Link}
             to={`/podcast/${activeEpisode.feedId}`}
             className={classes.author}
+            title={podcast?.author}
           >
-            {activeEpisode !== undefined
-              ? getEpisodeAuthor(subscriptions, activeEpisode.feedId)
-              : ""}
+            {podcast?.author}
           </MuiLink>
         </Box>
       ) : null}

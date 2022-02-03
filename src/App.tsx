@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   logo: {
     gridArea: "logo",
     display: "flex",
-    backgroundColor: `${theme.palette.info.light}66`,
   },
   header: {
     gridArea: "header",

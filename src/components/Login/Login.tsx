@@ -54,11 +54,11 @@ function Login() {
   function signInWithSocialMedia(provider: GoogleAuthProvider) {
     setAuthenticating(true);
     signInWithPopup(auth, provider)
-      .then((result) => {
+      .then(() => {
         history.push("/");
       })
       .catch((error) => {
-        // const errorMessage = error.message;
+        console.error(error.message);
       });
     setAuthenticating(false);
   }
@@ -66,11 +66,11 @@ function Login() {
   function continueAsGuest() {
     setAuthenticating(true);
     signInAnonymously(auth)
-      .then((result) => {
+      .then(() => {
         history.push("/");
       })
       .catch((error) => {
-        // const errorMessage = error.message;
+        console.error(error.message);
       });
     setAuthenticating(false);
   }

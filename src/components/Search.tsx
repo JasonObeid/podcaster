@@ -101,7 +101,7 @@ function Search({
       <Grid container spacing={3} direction="column" alignItems="stretch">
         {searchResults !== undefined &&
           searchResults.map((podcast) => (
-            <Grid item key={podcast.id} component="article">
+            <Grid item key={podcast.id}>
               <Podcast
                 podcastId={podcast.id}
                 subscriptions={subscriptions}

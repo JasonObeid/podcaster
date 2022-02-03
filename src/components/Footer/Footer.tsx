@@ -308,7 +308,7 @@ export default function Footer({
   }
 
   return (
-    <div className={classes.container}>
+    <footer className={classes.container}>
       <div className={classes.playback}>
         <IconButton
           onClick={handleShuffleChange}
@@ -418,6 +418,6 @@ export default function Footer({
           )}
         </Typography>
       </div>
-    </div>
+    </footer>
   );
 }

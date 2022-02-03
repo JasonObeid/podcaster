@@ -7,12 +7,7 @@ export default defineConfig({
   plugins: [reactRefresh()],
   build: {
     rollupOptions: {
-      plugins: [
-        // other plugins
-        // ....
-        //
-        visualizer(),
-      ],
+      plugins: [visualizer()],
     },
   },
 });

@@ -20,23 +20,4 @@ export default function Header() {
       </IconButton>
     </>
   );
-
-  // const canGoBack = history.action !== "POP";
-  // const canGoForward = history.action !== "PUSH";
-  // return (
-  //   <>
-  //     <IconButton
-  //       onClick={() => (canGoBack ? history.goBack() : undefined)}
-  //       disabled={!canGoBack}
-  //     >
-  //       <NavigateBeforeIcon />
-  //     </IconButton>
-  //     <IconButton
-  //       onClick={() => (canGoForward ? history.goForward() : undefined)}
-  //       disabled={!canGoForward}
-  //     >
-  //       <NavigateNextIcon />
-  //     </IconButton>
-  //   </>
-  // );
 }

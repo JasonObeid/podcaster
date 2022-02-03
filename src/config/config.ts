@@ -31,5 +31,7 @@ export function getFirebaseConfig(): FirebaseOptions | undefined {
       measurementId: measurementId,
     };
     return options;
+  } else {
+    throw Error("invalid firebase env variables");
   }
 }

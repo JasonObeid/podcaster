@@ -12,18 +12,13 @@ import { Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import Podcast from "./components/Podcast";
 import Episode from "./components/Episode";
-import {
-  isActiveEpisode,
-  isSubscription,
-  useQueriesTyped,
-} from "./utils/utils";
+import { isActiveEpisode, isSubscription } from "./utils/utils";
 import { get } from "firebase/database";
 import { User } from "firebase/auth";
 import AlbumArt from "./components/Footer/AlbumArt";
 import Header from "./components/Header/Header";
 import Logo from "./components/Header/Logo";
 import Footer from "./components/Footer/Footer";
-import Fade from "@material-ui/core/Fade";
 import { useQuery } from "react-query";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -32,13 +27,17 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "grid",
     gridTemplateColumns: "minmax(208px, 256px) minmax(720px, 1fr)",
     gridTemplateRows:
-      "minmax(24px, 48px) minmax(600px, 1fr) minmax(72px, 88px)",
+      "minmax(36px, 48px) minmax(600px, 1fr) minmax(72px, 88px)",
     gridAutoFlow: "row",
     gridTemplateAreas:
       '"logo header header" "navigation content content" "art controls controls"',
     height: "100%",
   },
-  logo: { gridArea: "logo", display: "flex" },
+  logo: {
+    gridArea: "logo",
+    display: "flex",
+    backgroundColor: `${theme.palette.info.light}66`,
+  },
   header: {
     gridArea: "header",
     display: "flex",
@@ -48,7 +47,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   navigation: {
     gridArea: "navigation",
-    marginBottom: "8px",
+    backgroundColor: `${theme.palette.info.main}66`,
   },
   content: {
     gridArea: "content",
@@ -56,7 +55,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflowX: "hidden",
     padding: "0px 24px",
     paddingRight: "280px",
-    marginTop: "8px",
     marginBottom: "8px",
     minWidth: "720px",
   },
@@ -90,7 +88,7 @@ function App() {
   >(undefined);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
-  const [maxEpisodes, setMaxEpisodes] = useState<number>(10);
+  const [maxEpisodes] = useState<number>(10);
   const feedIds = subscriptions.map((sub) => sub.id);
   const fetchedFeed = useQuery(
     `episodesByFeedId/${feedIds.join(",")}/${maxEpisodes}`,
@@ -162,7 +160,6 @@ function App() {
   useEffect(() => {
     auth.onAuthStateChanged((user: User | null) => {
       if (user !== null) {
-        console.log("User detected.");
         loadSubscriptionsStateFromDatabase(user);
         loadActiveEpisodeStateFromDatabase(user);
       } else {
@@ -172,21 +169,11 @@ function App() {
     });
   }, []);
 
-  // const [isNewPage, setIsNewPage] = useState(true);
-
-  // // Monitor route.
-  // useEffect(() => {
-  //   setIsNewPage(false);
-  //   setTimeout(() => {
-  //     setIsNewPage(true);
-  //   }, 200);
-  // }, [location.pathname]);
-
   return (
     <div className={classes.container}>
-      <header className={classes.logo}>
+      <div className={classes.logo}>
         <Logo></Logo>
-      </header>
+      </div>
       <header className={classes.header}>
         <Header></Header>
       </header>
@@ -280,7 +267,7 @@ function App() {
         </Suspense>
         {/* </Fade> */}
       </main>
-      <footer className={classes.controls}>
+      <div className={classes.controls}>
         <Footer
           episodes={sortedEpisodes}
           playbackStates={playbackStates}
@@ -290,13 +277,13 @@ function App() {
           setPlaybackStates={setPlaybackStates}
           setActiveEpisode={setActiveEpisode}
         />
-      </footer>
-      <footer className={classes.art}>
+      </div>
+      <div className={classes.art}>
         <AlbumArt
           activeEpisode={activeEpisode}
           subscriptions={subscriptions}
         ></AlbumArt>
-      </footer>
+      </div>
     </div>
   );
 }

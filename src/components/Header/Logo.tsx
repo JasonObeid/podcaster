@@ -11,6 +11,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     justifyContent: "space-between",
     flexGrow: 1,
+    backgroundColor: "transparent",
   },
   headerText: {
     paddingLeft: "8px",

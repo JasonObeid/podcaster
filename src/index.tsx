@@ -29,6 +29,7 @@ const theme = createTheme({
       light: teal[100],
     },
     info: {
+      light: blueGrey[50],
       main: blueGrey[100],
     },
   },

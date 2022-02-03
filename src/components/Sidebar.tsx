@@ -14,6 +14,9 @@ const useStyles = makeStyles({
   blackText: {
     color: "black",
   },
+  listRoot: {
+    padding: "0px",
+  },
 });
 
 function Sidebar() {
@@ -23,7 +26,11 @@ function Sidebar() {
 
   return (
     <>
-      <List component="nav" aria-label="home search subscriptions settings">
+      <List
+        component="nav"
+        aria-label="home search subscriptions settings"
+        classes={{ root: classes.listRoot }}
+      >
         <ListItem
           component={Link}
           to="/"
